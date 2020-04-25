@@ -1,5 +1,3 @@
-use std::iter::FromIterator;
-
 // day 02 of advent of code 2019
 
 // ––––––––––––––––––––––– notes ––––––––––––––––––––––––
@@ -20,16 +18,40 @@ use std::iter::FromIterator;
 
 // what value is left at position 0?
 
+// ––––––––––––––––––––– main ––––––––––––––––––––––––
+use std::iter::FromIterator;
+use std::fs::read_to_string;
+
+#[allow(dead_code)]
+fn main() {
+
+    // what pair of inputs produces 19690720?
+    let target = 19690720;
+
+    let str = read_to_string("./input/02").unwrap();
+    for i1 in 0..100 {
+        for i2 in 0..100 {
+            let answer = parse_and_compute_zero(&str, i1, i2);
+            if answer == target {
+                println!("{} {}", i1, i2);
+                return;
+            }
+        }
+    }
+    // the answer is 60 86.
+}
+
+
 // –––––––––––––––––––––– functions –––––––––––––––––––––––
 
 // the whole shebang
-pub fn parse_and_compute_zero(input: &str) -> usize {
+pub fn parse_and_compute_zero(input: &str, inp1: usize, inp2: usize) -> usize {
     let mut vec = parse(input);
     // "1202 program alarm state:"
     // - replace position 1 with value 12
     // - replace position 2 with value 2
-    vec[1] = 12;
-    vec[2] = 2;
+    vec[1] = inp1;
+    vec[2] = inp2;
 
     let result = intcompute(&mut vec);
 
@@ -64,27 +86,29 @@ pub fn intcompute(regs: &mut Vec<usize>) -> Vec<usize> {
 
     loop {
         match regs.get(index) {
-            Some(1) => compute_op(regs, index, plus),
-            Some(2) => compute_op(regs, index, times),
+            Some(1) => compute_op(regs, &mut index, plus),
+            Some(2) => compute_op(regs, &mut index, times),
             Some(99) => return regs.to_vec(),
             Some(_) => panic!("received unknown opcode"),
             None => panic!("expected instruction, but found none"),
         }
-
-        // increment index by 4.
-        index += 4;
     }
 }
 
-pub fn compute_op<F>(vec: &mut Vec<usize>, index: usize, op: F)
+// compute a binary operation
+pub fn compute_op<F>(vec: &mut Vec<usize>, index: &mut usize, op: F)
 where
     F: Fn(usize, usize) -> usize,
 {
-    match [vec.get(index + 1), vec.get(index + 2), vec.get(index + 3)] {
+    match [vec.get(*index + 1), vec.get(*index + 2), vec.get(*index + 3)] {
         [Some(index1), Some(index2), Some(put1)] => {
             let put_index = *put1;
             match [vec.get(*index1), vec.get(*index2)] {
-                [Some(num1), Some(num2)] => vec[put_index] = op(*num1, *num2),
+                [Some(num1), Some(num2)] => {
+                    vec[put_index] = op(*num1, *num2);
+                    // increment index by 4
+                    *index += 4;
+                },
                 _ => panic!("attempted to retrieve an invalid index"),
             }
         }
@@ -123,13 +147,13 @@ mod tests {
 
     #[test]
     fn test_wrapped() {
-        assert_eq!(parse_and_compute_zero("1,0,0,0,99,1,1,1,1,1,1,1,0"), 2);
+        assert_eq!(parse_and_compute_zero("1,0,0,0,99,1,1,1,1,1,1,1,0", 12, 2), 2);
         assert_eq!(
             parse_and_compute_zero(
                 "
     
     2,12,2,0,99,1,1,1,1,1,1,1,21
-    "
+    ", 12,2
             ),
             42
         );
@@ -141,7 +165,7 @@ mod tests {
     fn test_real() {
         let str = read_to_string("./input/02").unwrap();
 
-        let result = parse_and_compute_zero(&str);
+        let result = parse_and_compute_zero(&str, 12, 2);
 
         assert_eq!(result, 4330636);
     }
