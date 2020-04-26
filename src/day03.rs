@@ -1,3 +1,7 @@
+use std::iter::FromIterator;
+use std::str::FromStr;
+
+// represents a type of direction
 enum DirKind {
     Left,
     Right,
@@ -5,11 +9,13 @@ enum DirKind {
     Down,
 }
 
+// represents a direction, with a magnitude
 struct Dir {
     dist: i32,
     kind: DirKind,
 }
 
+// parses the input into two separate lists of directions
 fn parse(input: &str) -> (Vec<Dir>, Vec<Dir>) {
     let mut parts = input.trim().split("\n");
     let dirs_1 = parse_dirs(parts.next().unwrap());
@@ -17,15 +23,11 @@ fn parse(input: &str) -> (Vec<Dir>, Vec<Dir>) {
     (dirs_1, dirs_2)
 }
 
-use std::iter::FromIterator;
-
 // parse the dirs into an Iterator of dirs
 fn parse_dirs(input: &str) -> Vec<Dir> {
     // if any of them fail, panic
     Vec::from_iter(input.split(",").map(|s| s.parse::<Dir>().unwrap()))
 }
-
-use std::str::FromStr;
 
 // parse strings of the form (R|L|U|D)\d+ into Dirs
 impl FromStr for Dir {
