@@ -10,25 +10,19 @@ struct Dir {
     kind: DirKind,
 }
 
-fn parse(input: &str) -> (impl Iterator<Item = Dir>, impl Iterator<Item = Dir>) {
-    let trim = input.trim();
-    let parts = input.split("\n");
-
-    let fst = parts.next();
-    let snd = parts.next();
-    match (fst, snd) {
-        (Some(s1), Some(s2)) => (parse_dirs(s1), parse_dirs(s2)),
-        _ => panic!("couldn't find first and second parts"),
-    }
+fn parse(input: &str) -> (Vec<Dir>, Vec<Dir>) {
+    let mut parts = input.trim().split("\n");
+    let dirs_1 = parse_dirs(parts.next().unwrap());
+    let dirs_2 = parse_dirs(parts.next().unwrap());
+    (dirs_1, dirs_2)
 }
 
-fn parse_dirs(input: &str) -> Box<dyn Iterator<Item = Dir>> {
-    let parts = input.split(",");
+use std::iter::FromIterator;
 
-    fn parse_dir(s: &str) -> Result<Dir, String> {
-        return s.parse::<Dir>();
-    }
-    return Box::new(parts.map(parse_dir as fn(s: &str) -> Result<Dir, String>));
+// parse the dirs into an Iterator of dirs
+fn parse_dirs(input: &str) -> Vec<Dir> {
+    // if any of them fail, panic
+    Vec::from_iter(input.split(",").map(|s| s.parse::<Dir>().unwrap()))
 }
 
 use std::str::FromStr;
