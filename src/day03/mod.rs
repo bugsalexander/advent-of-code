@@ -1,8 +1,11 @@
 use std::iter::FromIterator;
 use std::str::FromStr;
 
+mod tests;
+
 // represents a type of direction
-enum DirKind {
+#[derive(PartialEq, Debug)]
+pub enum DirKind {
     Left,
     Right,
     Up,
@@ -10,6 +13,7 @@ enum DirKind {
 }
 
 // represents a direction, with a magnitude
+#[derive(PartialEq, Debug)]
 struct Dir {
     dist: i32,
     kind: DirKind,
@@ -58,17 +62,5 @@ impl FromStr for DirKind {
                 s
             ))),
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use std::iter::FromIterator;
-
-    #[test]
-    fn test_split() {
-        let vec: Vec<&str> = Vec::from_iter("one\ntwo".split("\n"));
-
-        assert_eq!(vec, vec!["one", "two"]);
     }
 }
