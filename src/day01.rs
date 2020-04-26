@@ -45,8 +45,7 @@ mod tests {
 
     #[test]
     fn day1() {
-        let rdr = || BufReader::new(File::open("../input/01").unwrap());
-
+        let rdr = || BufReader::new(File::open("input/01").unwrap());
         assert_eq!(calc_fuel(rdr().lines(), get_fuel), 3538016);
         assert_eq!(calc_fuel(rdr().lines(), get_fuel_r), 5304147);
     }
