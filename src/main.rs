@@ -7,7 +7,6 @@ mod day02;
 mod day03;
 
 fn main() {
-
     // what pair of inputs produces 19690720?
     let target = 19690720;
 
