@@ -1,5 +1,6 @@
 #[cfg(test)]
-use crate::day03::*;
+#[macro_use]
+use super::*;
 
 #[test]
 fn test_split() {
@@ -70,4 +71,17 @@ fn two_dir_lists_parse() {
         kind: DirKind::Down,
     };
     assert_eq!((vec![r10], vec![d99]), parse("R10\nD99"));
+}
+
+#[test]
+fn test_add_between() {
+    let mut to_add_to = vec![];
+    let p1 = Posn::new(0, 0);
+    let p2 = Posn::new(2, 2);
+    add_betweens(&mut to_add_to, &p1, &p2);
+
+    assert_eq!(
+        to_add_to,
+        vec![pos![1, 1], pos![1, 0], pos![0, 1], pos![0, 0]]
+    );
 }

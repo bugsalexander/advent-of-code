@@ -89,7 +89,7 @@ fn find_closest(input: &str) -> Posn {
 }
 
 /// represents a cartesian coordinate
-#[derive(Eq, PartialEq, Hash, PartialOrd, Clone, Copy)]
+#[derive(Eq, PartialEq, Hash, PartialOrd, Clone, Copy, Debug)]
 struct Posn {
     x: i32,
     y: i32,
@@ -100,6 +100,14 @@ impl Posn {
     fn new(x: i32, y: i32) -> Posn {
         Posn { x, y }
     }
+}
+
+/// experimenting with macros, uwu
+#[macro_export]
+macro_rules! pos {
+    ($x: expr, $y: expr) => {
+        Posn::new($x, $y)
+    };
 }
 
 use std::cmp::Ord;
@@ -149,7 +157,7 @@ fn all_corners(deltas: Vec<Dir>) -> Vec<Posn> {
 fn add_betweens(place: &mut Vec<Posn>, from: &Posn, to: &Posn) -> () {
     for x in to.x..from.x {
         for y in to.y..from.y {
-            place.push(Posn::new(x, y));
+            place.push(pos!(x, y));
         }
     }
 }
