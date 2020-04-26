@@ -19,12 +19,11 @@
 // what value is left at position 0?
 
 // ––––––––––––––––––––– main ––––––––––––––––––––––––
-use std::iter::FromIterator;
 use std::fs::read_to_string;
+use std::iter::FromIterator;
 
 #[allow(dead_code)]
 fn main() {
-
     // what pair of inputs produces 19690720?
     let target = 19690720;
 
@@ -40,7 +39,6 @@ fn main() {
     }
     // the answer is 60 86.
 }
-
 
 // –––––––––––––––––––––– functions –––––––––––––––––––––––
 
@@ -100,7 +98,11 @@ pub fn compute_op<F>(vec: &mut Vec<usize>, index: &mut usize, op: F)
 where
     F: Fn(usize, usize) -> usize,
 {
-    match [vec.get(*index + 1), vec.get(*index + 2), vec.get(*index + 3)] {
+    match [
+        vec.get(*index + 1),
+        vec.get(*index + 2),
+        vec.get(*index + 3),
+    ] {
         [Some(index1), Some(index2), Some(put1)] => {
             let put_index = *put1;
             match [vec.get(*index1), vec.get(*index2)] {
@@ -108,7 +110,7 @@ where
                     vec[put_index] = op(*num1, *num2);
                     // increment index by 4
                     *index += 4;
-                },
+                }
                 _ => panic!("attempted to retrieve an invalid index"),
             }
         }
@@ -147,13 +149,18 @@ mod tests {
 
     #[test]
     fn test_wrapped() {
-        assert_eq!(parse_and_compute_zero("1,0,0,0,99,1,1,1,1,1,1,1,0", 12, 2), 2);
+        assert_eq!(
+            parse_and_compute_zero("1,0,0,0,99,1,1,1,1,1,1,1,0", 12, 2),
+            2
+        );
         assert_eq!(
             parse_and_compute_zero(
                 "
     
     2,12,2,0,99,1,1,1,1,1,1,1,21
-    ", 12,2
+    ",
+                12,
+                2
             ),
             42
         );
