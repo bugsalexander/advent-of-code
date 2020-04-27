@@ -75,11 +75,11 @@ use std::collections::HashSet;
 fn find_closest(input: &str) -> Posn {
     let (one, two) = parse(input);
     // need to convert the list of deltas to list of positions
-    let posns_list = all_posns(all_corners(one));
+    let posns_list = all_posns_fast(one);
     let posns_set = HashSet::<&Posn>::from_iter(posns_list.iter());
     let mut collisions = BinaryHeap::new();
 
-    for posn in all_posns(all_corners(two)) {
+    for posn in all_posns_fast(two) {
         if posns_set.contains(&posn) {
             collisions.push(posn);
         }
@@ -102,14 +102,6 @@ impl Posn {
     }
 }
 
-/// experimenting with macros, uwu
-#[macro_export]
-macro_rules! pos {
-    ($x: expr, $y: expr) => {
-        Posn::new($x, $y)
-    };
-}
-
 use std::cmp::Ord;
 use std::cmp::Ordering;
 
@@ -120,44 +112,28 @@ impl Ord for Posn {
     }
 }
 
-/// convert a list of the corners to a list of the posns. assumes the directions start at 0, 0
-fn all_posns(corners: Vec<Posn>) -> Vec<Posn> {
-    //! this is an innder doc
-    let mut posns = Vec::<Posn>::new();
-    // okay to unwrap, since should always have 0,0
-    let prev = Posn::new(0, 0);
-
-    for corner in corners {
-        add_betweens(&mut posns, &prev, &corner);
-    }
-    return posns;
-}
-
-/// finds the corners of all the dirs. does NOT include 0,0
-fn all_corners(deltas: Vec<Dir>) -> Vec<Posn> {
-    let mut corners: Vec<Posn> = Vec::new();
-    let mut prev = Posn::new(0, 0);
-
-    // for each of the directions, produce the next posn
-    for dir in deltas {
-        let next = match dir.kind {
-            DirKind::Left => Posn::new(prev.x - dir.dist, prev.y),
-            DirKind::Right => Posn::new(prev.x - dir.dist, prev.y),
-            DirKind::Up => Posn::new(prev.x - dir.dist, prev.y),
-            DirKind::Down => Posn::new(prev.x - dir.dist, prev.y),
-        };
-        corners.push(next);
-        prev = next;
-    }
-
-    return corners;
-}
-
-/// adds all the posns between the two to the vector, exclusive of the last. adds them in reverse order
-fn add_betweens(place: &mut Vec<Posn>, from: &Posn, to: &Posn) -> () {
-    for x in to.x..from.x {
-        for y in to.y..from.y {
-            place.push(pos!(x, y));
+// assumes that dirs only have positive distances
+fn all_posns_fast(dirs: Vec<Dir>) -> Vec<Posn> {
+    let mut current: &Posn = &Posn::new(0, 0);
+    let mut all: Vec::<Posn> = vec![*current];
+    
+    let mut next;
+    for dir in dirs {
+        for _ in 0..dir.dist {
+            next = match dir.kind {
+                DirKind::Left => posn_delta(&current, -1, 0),
+                DirKind::Right => posn_delta(&current, 1, 0),
+                DirKind::Up => posn_delta(&current, 0, 1),
+                DirKind::Down => posn_delta(&current, 0, -1),
+            };
+            all.push(next);
+            current = &next;
         }
     }
+
+    all
+}
+
+fn posn_delta(p: &Posn, dx: i32, dy: i32) -> Posn {
+    Posn::new(p.x + dx, p.y + dy)
 }
