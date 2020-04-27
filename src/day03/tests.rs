@@ -73,14 +73,15 @@ fn two_dir_lists_parse() {
 }
 
 /// experimenting with macros, uwu
-#[macro_use]
+/// couldn't figure out why it's saying "unused", so had to put these in
+#[allow(unused_macros)]
 macro_rules! pos {
     ($x: expr, $y: expr) => {
         Posn::new($x, $y)
     };
 }
 
-#[macro_use]
+#[allow(unused_macros)]
 macro_rules! dir {
     ($kind: expr, $dist: expr) => {
         Dir {
@@ -92,7 +93,6 @@ macro_rules! dir {
 
 #[test]
 fn test_all_posns() {
-    
     // R10
     let right_four = dir!(DirKind::Right, 4);
     let down_three = dir!(DirKind::Down, 3);
@@ -100,9 +100,9 @@ fn test_all_posns() {
     assert_eq!(
         all_posns_fast(vec![right_four, down_three]),
         vec![
-            pos![0, 0], 
-            pos![1, 0], 
-            pos![2, 0], 
+            pos![0, 0],
+            pos![1, 0],
+            pos![2, 0],
             pos![3, 0],
             pos![4, 0],
             pos![4, -1],
@@ -110,4 +110,13 @@ fn test_all_posns() {
             pos![4, -3],
         ]
     );
+}
+
+#[test]
+fn it_is_correct() {
+    let input = std::fs::read_to_string("./input/03").unwrap();
+    let parsed = parse(&input);
+    let result = find_closest(parsed.0, parsed.1);
+
+    assert_eq!(result.manhattan(), 209);
 }

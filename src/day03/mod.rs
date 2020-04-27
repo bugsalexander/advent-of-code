@@ -125,8 +125,8 @@ impl PartialOrd for Posn {
 // assumes that dirs only have positive distances
 fn all_posns_fast(dirs: Vec<Dir>) -> Vec<Posn> {
     let mut current: &Posn = &Posn::new(0, 0);
-    let mut all: Vec::<Posn> = vec![*current];
-    
+    let mut all: Vec<Posn> = vec![*current];
+
     let mut next;
     for dir in dirs {
         for _ in 0..dir.dist {
