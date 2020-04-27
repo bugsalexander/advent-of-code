@@ -1,5 +1,4 @@
 #[cfg(test)]
-#[macro_use]
 use super::*;
 
 #[test]
@@ -73,15 +72,42 @@ fn two_dir_lists_parse() {
     assert_eq!((vec![r10], vec![d99]), parse("R10\nD99"));
 }
 
+/// experimenting with macros, uwu
+#[macro_use]
+macro_rules! pos {
+    ($x: expr, $y: expr) => {
+        Posn::new($x, $y)
+    };
+}
+
+#[macro_use]
+macro_rules! dir {
+    ($kind: expr, $dist: expr) => {
+        Dir {
+            kind: $kind,
+            dist: $dist,
+        }
+    };
+}
+
 #[test]
-fn test_add_between() {
-    let mut to_add_to = vec![];
-    let p1 = Posn::new(0, 0);
-    let p2 = Posn::new(2, 2);
-    add_betweens(&mut to_add_to, &p1, &p2);
+fn test_all_posns() {
+    
+    // R10
+    let right_four = dir!(DirKind::Right, 4);
+    let down_three = dir!(DirKind::Down, 3);
 
     assert_eq!(
-        to_add_to,
-        vec![pos![1, 1], pos![1, 0], pos![0, 1], pos![0, 0]]
+        all_posns_fast(vec![right_four, down_three]),
+        vec![
+            pos![0, 0], 
+            pos![1, 0], 
+            pos![2, 0], 
+            pos![3, 0],
+            pos![4, 0],
+            pos![4, -1],
+            pos![4, -2],
+            pos![4, -3],
+        ]
     );
 }
