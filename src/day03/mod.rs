@@ -6,7 +6,7 @@ mod tests;
 
 /// represents a type of direction
 #[derive(PartialEq, Debug)]
-enum DirKind {
+pub enum DirKind {
     Left,
     Right,
     Up,
@@ -15,13 +15,13 @@ enum DirKind {
 
 /// represents a direction, with a magnitude
 #[derive(PartialEq, Debug)]
-struct Dir {
+pub struct Dir {
     dist: i32,
     kind: DirKind,
 }
 
 /// parses the input into two separate lists of directions
-fn parse(input: &str) -> (Vec<Dir>, Vec<Dir>) {
+pub fn parse(input: &str) -> (Vec<Dir>, Vec<Dir>) {
     let mut parts = input.trim().split("\n");
     let dirs_1 = parse_dirs(parts.next().unwrap());
     let dirs_2 = parse_dirs(parts.next().unwrap());
@@ -72,8 +72,7 @@ use std::collections::BinaryHeap;
 use std::collections::HashSet;
 
 /// take in a string, output the two locations
-fn find_closest(input: &str) -> Posn {
-    let (one, two) = parse(input);
+pub fn find_closest(one: Vec<Dir>, two: Vec<Dir>) -> Posn {
     // need to convert the list of deltas to list of positions
     let posns_list = all_posns_fast(one);
     let posns_set = HashSet::<&Posn>::from_iter(posns_list.iter());
@@ -85,20 +84,25 @@ fn find_closest(input: &str) -> Posn {
         }
     }
 
-    return collisions.pop().unwrap();
+    collisions.pop();
+    return *collisions.peek().unwrap();
 }
 
 /// represents a cartesian coordinate
-#[derive(Eq, PartialEq, Hash, PartialOrd, Clone, Copy, Debug)]
-struct Posn {
-    x: i32,
-    y: i32,
+#[derive(Eq, PartialEq, Hash, Clone, Copy, Debug)]
+pub struct Posn {
+    pub x: i32,
+    pub y: i32,
 }
 
 /// creates a new posn
 impl Posn {
     fn new(x: i32, y: i32) -> Posn {
         Posn { x, y }
+    }
+
+    pub fn manhattan(self: &Self) -> i32 {
+        self.x.abs() + self.y.abs()
     }
 }
 
@@ -108,7 +112,13 @@ use std::cmp::Ordering;
 /// compare posns by their manhattan distance
 impl Ord for Posn {
     fn cmp(&self, other: &Self) -> Ordering {
-        (self.x + self.y).cmp(&(other.x + other.y))
+        self.manhattan().cmp(&other.manhattan()).reverse()
+    }
+}
+
+impl PartialOrd for Posn {
+    fn partial_cmp(&self, other: &Posn) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
