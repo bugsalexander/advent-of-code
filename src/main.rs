@@ -14,5 +14,5 @@ fn main() {
     let result = day03::find_closest(parsed.0, parsed.1);
 
     println!("{:#?}", result);
-    println!("{}", result.manhattan());
+    println!("{:#?}", result.total.unwrap());
 }
