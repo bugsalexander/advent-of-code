@@ -79,6 +79,10 @@ macro_rules! pos {
     ($x: expr, $y: expr) => {
         Posn::new($x, $y)
     };
+
+    ($x: expr, $y: expr, $d: expr) => {
+        Posn::new_dist($x, $y, Some($d))
+    };
 }
 
 #[allow(unused_macros)]
@@ -92,7 +96,16 @@ macro_rules! dir {
 }
 
 #[test]
-fn test_all_posns() {
+fn test_all_posns_simple() {
+    let down_one = dir!(DirKind::Down, 1);
+    assert_eq!(
+        all_posns_fast(vec![down_one]),
+        vec![pos![0, 0, 0], pos![0, -1, 1]]
+    );
+}
+
+#[test]
+fn test_all_posns_complex() {
     // R10
     let right_four = dir!(DirKind::Right, 4);
     let down_three = dir!(DirKind::Down, 3);
@@ -100,14 +113,14 @@ fn test_all_posns() {
     assert_eq!(
         all_posns_fast(vec![right_four, down_three]),
         vec![
-            pos![0, 0],
-            pos![1, 0],
-            pos![2, 0],
-            pos![3, 0],
-            pos![4, 0],
-            pos![4, -1],
-            pos![4, -2],
-            pos![4, -3],
+            pos![0, 0, 0],
+            pos![1, 0, 1],
+            pos![2, 0, 2],
+            pos![3, 0, 3],
+            pos![4, 0, 4],
+            pos![4, -1, 5],
+            pos![4, -2, 6],
+            pos![4, -3, 7],
         ]
     );
 }
@@ -118,5 +131,5 @@ fn it_is_correct() {
     let parsed = parse(&input);
     let result = find_closest(parsed.0, parsed.1);
 
-    assert_eq!(result.manhattan(), 209);
+    assert_eq!(result.total.unwrap(), 43258);
 }
