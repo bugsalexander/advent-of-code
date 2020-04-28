@@ -2,7 +2,9 @@
 
 This one was a little more difficult. Here I'll go over some things I learned, and also a bit about how my code works.
 
-## Greedy Closures
+## Discoveries
+
+### Greedy Closures
 
 I was still in the process of figuring out how borrowing references works with scope, especially with closures. One of the things I do normally is write closures to abstract out repeat code. However, these closures usually have to refer to mutable references. 
 
@@ -11,6 +13,29 @@ The only problem is that closures effectively produce a new scope, and "borrow" 
 After making a few calls (lol), you may want to access the mutable references again. But you can't! They currently belong to the closure. 
 
 The fix to this issue is super simple: introduce a new scope, declare the closure, and make your calls. When you exit the scope, the closure will "give back" the references it borrowed, because its lifetime expired.
+
+### Project Structure
+
+Another thing that took me an annoying amount of time to figure out was *what code actually gets run* when I do `cargo test`. In the midst of day3, I realized that my code (which shouldn't have been compiling) wasn't throwing any errors in my editor (no red squigglies). Hmm, that's weird.
+
+Long story short, I did a bunch of googling, and found out that modules only get run if they are included in the `main.rs` module.
+
+For example, if I have a bunch of tests in module `day02`, but my `fn main` looks like this:
+
+```
+mod day03;
+fn main() {
+  // does stuff
+}
+```
+
+The only tests that get run are from module `day03`, and not any others. This is helpful, though, since I don't want a bajillion lines of "test passed" to appear the further I get in advent of code.
+
+### Macros are hard
+
+Yeah, title. This one's not surprising, since I've never written macros in any language before. The ones that I did write were basically equivalent to functions, and required zero brainpower.
+
+Also, they only exist in scope *after* they have been run in a file. This means that declaring a macro in `mod.rs` and then including `mod tests.rs` at the top of that file means you won't be able to refer to the macro inside of `tests.rs` (assuming the macro appears sometime after the import, in `mod.rs`).
 
 ## Code Structure
 
