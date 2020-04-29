@@ -32,15 +32,20 @@ fn not_decreasing_has_repeat(n: &str) -> bool {
         .nth(0)
         .expect("not_decreasing: number was not at least 1 digit long");
     let mut has_repeat = false;
+    let mut count = 1;
     for digit in chars {
         if min < digit {
             min = digit;
+            if count == 2 {
+                has_repeat = true;
+            }
+            count = 1;
         } else if min == digit {
-            has_repeat = true;
+            count += 1;
         } else {
             return false;
         }
     }
 
-    has_repeat
+    has_repeat || count == 2
 }
