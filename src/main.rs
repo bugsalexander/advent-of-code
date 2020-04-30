@@ -1,4 +1,6 @@
 #![allow(dead_code)]
+#![warn(clippy::all)]
+#![allow(clippy::needless_return)]
 
 mod day01;
 mod day02;
