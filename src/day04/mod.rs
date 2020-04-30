@@ -24,26 +24,28 @@ pub fn oracle(min: &str, max: &str) -> u64 {
     count
 }
 
+use std::cmp::Ordering;
+
 /// does a number have not decreasing digits?
 /// does a number have a repeat?
 fn not_decreasing_has_repeat(n: &str) -> bool {
     let mut chars = n.chars();
     let mut min = chars
-        .nth(0)
+        .next()
         .expect("not_decreasing: number was not at least 1 digit long");
     let mut has_repeat = false;
     let mut count = 1;
     for digit in chars {
-        if min < digit {
-            min = digit;
-            if count == 2 {
-                has_repeat = true;
+        match min.cmp(&digit) {
+            Ordering::Less => {
+                min = digit;
+                if count == 2 {
+                    has_repeat = true;
+                }
+                count = 1;
             }
-            count = 1;
-        } else if min == digit {
-            count += 1;
-        } else {
-            return false;
+            Ordering::Equal => count += 1,
+            Ordering::Greater => return false,
         }
     }
 

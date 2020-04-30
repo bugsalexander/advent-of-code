@@ -22,7 +22,7 @@ pub struct Dir {
 
 /// parses the input into two separate lists of directions
 pub fn parse(input: &str) -> (Vec<Dir>, Vec<Dir>) {
-    let mut parts = input.trim().split("\n");
+    let mut parts = input.trim().split('\n');
     let dirs_1 = parse_dirs(parts.next().unwrap());
     let dirs_2 = parse_dirs(parts.next().unwrap());
     (dirs_1, dirs_2)
@@ -31,7 +31,7 @@ pub fn parse(input: &str) -> (Vec<Dir>, Vec<Dir>) {
 /// parse the dirs into an Iterator of dirs
 fn parse_dirs(input: &str) -> Vec<Dir> {
     // if any of them fail, panic
-    Vec::from_iter(input.split(",").map(|s| s.parse::<Dir>().unwrap()))
+    Vec::from_iter(input.split(',').map(|s| s.parse::<Dir>().unwrap()))
 }
 
 /// parse strings of the form (R|L|U|D)\d+ into Dirs
@@ -43,7 +43,7 @@ impl FromStr for Dir {
                 kind: d.parse::<DirKind>().unwrap(),
                 dist: str::parse::<i32>(len).expect("didn't have a length"),
             }),
-            _ => Err(String::from(format!("failed to parse into dir: {}", s))),
+            _ => Err(format!("failed to parse into dir: {}", s)),
         }
     }
 }
@@ -58,10 +58,10 @@ impl FromStr for DirKind {
             "L" => Ok(DirKind::Left),
             "U" => Ok(DirKind::Up),
             "D" => Ok(DirKind::Down),
-            _ => Err(String::from(format!(
+            _ => Err(format!(
                 "parse::<DirKind>: expected one of R|L|U|D. got {}",
                 s
-            ))),
+            )),
         }
     }
 }
@@ -79,11 +79,8 @@ pub fn find_closest(one: Vec<Dir>, two: Vec<Dir>) -> TwoPosns {
     let mut collisions = BinaryHeap::<TwoPosns>::new();
 
     for posn in all_posns_fast(two) {
-        match posns_set.get(&posn) {
-            Some(other_posn) => {
-                collisions.push(TwoPosns::new(**other_posn, posn));
-            }
-            _ => {}
+        if let Some(other_posn) = posns_set.get(&posn) {
+            collisions.push(TwoPosns::new(**other_posn, posn));
         }
     }
 

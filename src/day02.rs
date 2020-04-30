@@ -25,7 +25,7 @@ use std::iter::FromIterator;
 #[allow(dead_code)]
 fn main() {
     // what pair of inputs produces 19690720?
-    let target = 19690720;
+    let target = 19_690_720;
 
     let str = read_to_string("./input/02").unwrap();
     for i1 in 0..100 {
@@ -62,7 +62,7 @@ pub fn parse_and_compute_zero(input: &str, inp1: usize, inp2: usize) -> usize {
 // parse the form 0,1,2,3,3 into a Vec<usize>
 pub fn parse(input: &str) -> Vec<usize> {
     let mut i = 0;
-    let nums = input.trim().split(",").map(|item| {
+    let nums = input.trim().split(',').map(|item| {
         // try and parse each item to usize
         match str::parse::<usize>(item) {
             Ok(n) => {
@@ -174,6 +174,6 @@ mod tests {
 
         let result = parse_and_compute_zero(&str, 12, 2);
 
-        assert_eq!(result, 4330636);
+        assert_eq!(result, 4_330_636);
     }
 }

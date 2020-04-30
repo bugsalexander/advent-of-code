@@ -3,7 +3,7 @@ use super::*;
 
 #[test]
 fn test_split() {
-    let vec: Vec<&str> = Vec::from_iter("one\ntwo".split("\n"));
+    let vec: Vec<&str> = Vec::from_iter("one\ntwo".split('\n'));
 
     assert_eq!(vec, vec!["one", "two"]);
 }
