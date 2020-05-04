@@ -1,4 +1,5 @@
 use std::iter::FromIterator;
+mod tests;
 
 // state is composed of
 // - instruction pointer: marks the _next_ instruction to execute
@@ -55,22 +56,27 @@ pub fn compute_binop<F>(vec: &mut Vec<usize>, index: &mut usize, op: F)
 where
     F: Fn(usize, usize) -> usize,
 {
-    if let [Some(index1), Some(index2), Some(put1)] = [
-        vec.get(*index + 1),
-        vec.get(*index + 2),
-        vec.get(*index + 3),
-    ] {
-        let put_index = *put1;
-        if let [Some(num1), Some(num2)] = [vec.get(*index1), vec.get(*index2)] {
-            vec[put_index] = op(*num1, *num2);
-            // increment index by 4
-            *index += 4;
-        } else {
-            panic!("attempted to retrieve an invalid index");
-        }
-    } else {
-        panic!("attempted to retrieve an invalid index");
+    let num1 = try_index_twice(vec, *index + 1);
+    let num2 = try_index_twice(vec, *index + 2);
+    let dest = try_index_twice(vec, *index + 3);
+
+    vec[dest] = op(num1, num2);
+
+    *index += 4;
+}
+
+/// indexes the vec. unwraps once.
+fn try_index_once(vec: &[usize], index: usize) -> usize {
+    if let Some(result) = vec.get(index) {
+        return *result;
     }
+
+    panic!("attempted to retrieve an invalid index");
+}
+
+/// indexes the vec, and then indexes again with the result. unwraps twice.
+fn try_index_twice(vec: &[usize], index: usize) -> usize {
+    return try_index_once(vec, try_index_once(vec, index));
 }
 
 // compute a unary operation
@@ -80,6 +86,8 @@ where
 {
     if let Some(&target_index) = vec.get(*index + 1) {
         // now that we have our target index, call the operation
-        op(&mut vec, target_index);
+        op(vec, target_index);
+    } else {
+        panic!("attempted to retrieve an invalid index");
     }
 }
