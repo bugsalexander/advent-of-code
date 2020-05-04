@@ -1,4 +1,4 @@
-use std::iter::FromIterator;
+use crate::day02::parse;
 mod tests;
 
 // state is composed of
@@ -6,7 +6,7 @@ mod tests;
 // - registers: a bunch of registers, each with a numeric value
 
 // the whole shebang
-pub fn parse_and_compute_zero(input: &str, inp1: usize, inp2: usize) -> usize {
+pub fn parse_and_compute_zero(input: &str) -> usize {
     let mut vec = parse(input);
 
     let result = intcompute(&mut vec);
@@ -15,22 +15,6 @@ pub fn parse_and_compute_zero(input: &str, inp1: usize, inp2: usize) -> usize {
         Some(result) => *result,
         None => panic!("there was no zero index"),
     }
-}
-
-// parse the form 0,1,2,3,3 into a Vec<usize>
-pub fn parse(input: &str) -> Vec<usize> {
-    let mut i = 0;
-    let nums = input.trim().split(',').map(|item| {
-        // try and parse each item to usize
-        match str::parse::<usize>(item) {
-            Ok(n) => {
-                i += 1;
-                return n;
-            }
-            Err(e) => panic!("value {} panicked at index {} with error {}", item, i, e),
-        }
-    });
-    Vec::from_iter(nums)
 }
 
 // runs an int program
