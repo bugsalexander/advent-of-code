@@ -17,6 +17,8 @@ pub fn parse_and_compute_zero(input: &str) -> usize {
     }
 }
 
+use std::io::BufRead;
+
 // runs an int program
 pub fn intcompute(regs: &mut Vec<usize>) -> Vec<usize> {
     let mut index: usize = 0;
@@ -24,10 +26,26 @@ pub fn intcompute(regs: &mut Vec<usize>) -> Vec<usize> {
     let plus = |n1, n2| n1 + n2;
     let times = |n1, n2| n1 * n2;
 
+    // do something with the next line of input.
+    let mut current_line: usize = 0;
+    let mut do_input = |vec: &mut Vec<usize>, target: usize| {
+        // grab the current line, set the dest equal to the result
+        // if we don't have a result, then error
+        match ith_line(&current_line).and_then(|s| s.parse::<usize>().ok()) {
+            Some(number) => {
+                vec[target] = number;
+                current_line += 1;
+                return;
+            }
+            None => panic!("not enough lines to match input!"),
+        }
+    };
+
     loop {
         match regs.get(index) {
             Some(1) => compute_binop(regs, &mut index, plus),
             Some(2) => compute_binop(regs, &mut index, times),
+            Some(3) => compute_unop(regs, &mut index, &mut do_input),
             Some(99) => return regs.to_vec(),
             Some(_) => panic!("received unknown opcode"),
             None => panic!("expected instruction, but found none"),
@@ -35,10 +53,30 @@ pub fn intcompute(regs: &mut Vec<usize>) -> Vec<usize> {
     }
 }
 
-// compute a binary operation
+use std::cmp::Ordering;
+
+// grab the ith line. complexity O(i), excluding overhead of creating iterator over stdin.
+fn ith_line(target: &usize) -> Option<String> {
+    for (current, line) in std::io::stdin().lock().lines().enumerate() {
+        match (current.cmp(target), line) {
+            (Ordering::Equal, Ok(input)) => {
+                // grab the line, and exit. we are done
+                return Some(input);
+            }
+            (Ordering::Equal, Err(e)) => panic!("error parsing line: {}", e),
+            (Ordering::Greater, _) => return None,
+            (Ordering::Less, _) => {}
+        }
+    }
+
+    // if we got this far, then #lines < target.
+    None
+}
+
+/// compute a binary operation. we assume that all binary operations have a total size of 4.
 pub fn compute_binop<F>(vec: &mut Vec<usize>, index: &mut usize, op: F)
 where
-    F: Fn(usize, usize) -> usize,
+    F: FnOnce(usize, usize) -> usize,
 {
     let num1 = try_index_twice(vec, *index + 1);
     let num2 = try_index_twice(vec, *index + 2);
@@ -46,6 +84,7 @@ where
 
     vec[dest] = op(num1, num2);
 
+    // increment by 1 for instruction, 2 for params, 1 for destination = 4
     *index += 4;
 }
 
@@ -66,12 +105,9 @@ fn try_index_twice(vec: &[usize], index: usize) -> usize {
 // compute a unary operation
 pub fn compute_unop<F>(vec: &mut Vec<usize>, index: &mut usize, op: F)
 where
-    F: Fn(&mut Vec<usize>, usize) -> (),
+    F: FnOnce(&mut Vec<usize>, usize) -> (),
 {
-    if let Some(&target_index) = vec.get(*index + 1) {
-        // now that we have our target index, call the operation
-        op(vec, target_index);
-    } else {
-        panic!("attempted to retrieve an invalid index");
-    }
+    let target_index = try_index_once(vec, *index);
+
+    op(vec, target_index);
 }
