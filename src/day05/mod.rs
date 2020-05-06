@@ -40,12 +40,17 @@ pub fn intcompute(regs: &mut Vec<usize>) -> Vec<usize> {
             None => panic!("not enough lines to match input!"),
         }
     };
+    // output the thingy at the specified index
+    let do_output = |vec: &mut Vec<usize>, target: usize| {
+        println!("{}", try_index_once(vec, target));
+    };
 
     loop {
         match regs.get(index) {
             Some(1) => compute_binop(regs, &mut index, plus),
             Some(2) => compute_binop(regs, &mut index, times),
             Some(3) => compute_unop(regs, &mut index, &mut do_input),
+            Some(4) => compute_unop(regs, &mut index, do_output),
             Some(99) => return regs.to_vec(),
             Some(_) => panic!("received unknown opcode"),
             None => panic!("expected instruction, but found none"),
@@ -107,7 +112,11 @@ pub fn compute_unop<F>(vec: &mut Vec<usize>, index: &mut usize, op: F)
 where
     F: FnOnce(&mut Vec<usize>, usize) -> (),
 {
-    let target_index = try_index_once(vec, *index);
+    // pass the singular argument to our operation, if we have one.
+    let target_index = try_index_once(vec, *index + 1);
 
     op(vec, target_index);
+
+    // increment by 2 (opcode and single parameter)
+    *index += 2;
 }
