@@ -46,7 +46,8 @@ pub fn intcompute(regs: &mut Vec<usize>) -> Vec<usize> {
     };
 
     loop {
-        match regs.get(index) {
+        let opcode_iter = OpIter::new(regs.get(index).unwrap());
+        match opcode_iter.code {
             Some(1) => compute_binop(regs, &mut index, plus),
             Some(2) => compute_binop(regs, &mut index, times),
             Some(3) => compute_unop(regs, &mut index, &mut do_input),
@@ -55,6 +56,33 @@ pub fn intcompute(regs: &mut Vec<usize>) -> Vec<usize> {
             Some(_) => panic!("received unknown opcode"),
             None => panic!("expected instruction, but found none"),
         }
+    }
+}
+
+use std::iter::Iterator;
+
+struct OpIter<'a, F> {
+    pub code: i32,
+    vals: std::iter::Map<std::str::Split<'a, &'a str>, F>,
+}
+impl<'a, F> OpIter<'a, F>
+where
+    F: FnMut(&str) -> usize,
+{
+    fn new(parammodes_and_opcode: &'a str) -> OpIter<F> {
+        let mapper = |v: &'a str| v.parse::<usize>();
+        return OpIter {
+            code: 0,
+            vals: parammodes_and_opcode.split("").map(mapper),
+        };
+    }
+}
+
+impl<'a, F> Iterator for OpIter<'a, F> {
+    type Item = usize;
+
+    fn next(&mut self) -> Option<usize> {
+        self.vals.next()
     }
 }
 
