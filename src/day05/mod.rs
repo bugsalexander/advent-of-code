@@ -46,7 +46,7 @@ pub fn intcompute(regs: &mut Vec<usize>) -> Vec<usize> {
     };
 
     loop {
-        let opcode_iter = OpIter::new(regs.get(index).unwrap());
+        let opcode_iter = ParamModes::new(&regs.get(index).unwrap().to_string());
         match opcode_iter.code {
             Some(1) => compute_binop(regs, &mut index, plus),
             Some(2) => compute_binop(regs, &mut index, times),
@@ -59,30 +59,29 @@ pub fn intcompute(regs: &mut Vec<usize>) -> Vec<usize> {
     }
 }
 
+use std::iter::FromIterator;
 use std::iter::Iterator;
 
-struct OpIter<'a, F> {
-    pub code: i32,
-    vals: std::iter::Map<std::str::Split<'a, &'a str>, F>,
+/// vals contains the parameter modes from right to left
+struct ParamModes {
+    pub code: Option<usize>,
+    vals: Vec<usize>,
 }
-impl<'a, F> OpIter<'a, F>
-where
-    F: FnMut(&str) -> usize,
-{
-    fn new(parammodes_and_opcode: &'a str) -> OpIter<F> {
-        let mapper = |v: &'a str| v.parse::<usize>();
-        return OpIter {
-            code: 0,
-            vals: parammodes_and_opcode.split("").map(mapper),
+
+/// creates param modes from a string
+impl ParamModes {
+    fn new(parammodes_and_opcode: &str) -> ParamModes {
+        /// helper function to parse to usize
+        fn parse_to_usize(n: &str) -> usize {
+            n.parse::<usize>().unwrap()
+        }
+
+        let mut values = parammodes_and_opcode.split("").map(parse_to_usize);
+
+        return ParamModes {
+            code: values.next(),
+            vals: Vec::from_iter(values),
         };
-    }
-}
-
-impl<'a, F> Iterator for OpIter<'a, F> {
-    type Item = usize;
-
-    fn next(&mut self) -> Option<usize> {
-        self.vals.next()
     }
 }
 
