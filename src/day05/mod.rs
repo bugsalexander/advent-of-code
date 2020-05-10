@@ -63,24 +63,46 @@ use std::iter::FromIterator;
 use std::iter::Iterator;
 
 /// vals contains the parameter modes from right to left
+#[derive(Debug, PartialEq, Eq)]
 struct ParamModes {
     pub code: Option<usize>,
     vals: Vec<usize>,
 }
 
+use std::convert::TryFrom;
+
 /// creates param modes from a string
 impl ParamModes {
     fn new(parammodes_and_opcode: &str) -> ParamModes {
         /// helper function to parse to usize
-        fn parse_to_usize(n: &str) -> usize {
-            n.parse::<usize>().unwrap()
+        fn parse_to_usize(n: char) -> usize {
+            usize::try_from(n.to_digit(10).unwrap()).unwrap()
         }
 
-        let mut values = parammodes_and_opcode.split("").map(parse_to_usize);
+        // the digits, left -> right
+        let values = Vec::from_iter(parammodes_and_opcode.chars());
+
+        let opcode = match values[..] {
+            [.., d1, d2] => vec![d1, d2]
+                .into_iter()
+                .collect::<String>()
+                .parse::<usize>()
+                .ok(),
+            [.., d] => d.to_string().parse::<usize>().ok(),
+            _ => None,
+        };
+
+        let elems = values.len();
+        let param_modes = match values.len() {
+            2..=usize::MAX => {
+                Vec::from_iter(values.into_iter().take(elems - 2).map(parse_to_usize))
+            }
+            _ => Vec::new(),
+        };
 
         return ParamModes {
-            code: values.next(),
-            vals: Vec::from_iter(values),
+            code: opcode,
+            vals: param_modes,
         };
     }
 }
