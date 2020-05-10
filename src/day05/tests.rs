@@ -30,7 +30,7 @@ fn test_parsing() {
         ParamModes::new("1002"),
         ParamModes {
             opcode: Some(2),
-            param_modes: vec![1, 0],
+            param_modes: vec![0, 1],
         }
     );
     assert_eq!(

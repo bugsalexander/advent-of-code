@@ -91,7 +91,11 @@ impl ParamModes {
                     .parse::<usize>()
                     .ok(),
                 param_modes: Vec::from_iter(
-                    values.into_iter().take(length - 2).map(parse_to_usize),
+                    values
+                        .into_iter()
+                        .take(length - 2)
+                        .map(parse_to_usize)
+                        .rev(),
                 ),
             },
             [d] => ParamModes {
