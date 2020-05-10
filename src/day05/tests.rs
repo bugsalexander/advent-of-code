@@ -29,23 +29,23 @@ fn test_parsing() {
     assert_eq!(
         ParamModes::new("1002"),
         ParamModes {
-            code: Some(2),
-            vals: vec![1, 0],
+            opcode: Some(2),
+            param_modes: vec![1, 0],
         }
     );
     assert_eq!(
         ParamModes::new("2"),
         ParamModes {
-            code: Some(2),
-            vals: vec![]
+            opcode: Some(2),
+            param_modes: vec![]
         }
     );
 
     assert_eq!(
         ParamModes::new("099"),
         ParamModes {
-            code: Some(99),
-            vals: vec![0]
+            opcode: Some(99),
+            param_modes: vec![0]
         }
     );
 }
