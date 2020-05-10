@@ -17,3 +17,35 @@ fn test_try_index_twice() {
     assert_eq!(try_index_twice(&vec, 3), 3);
     assert_eq!(try_index_twice(&vec, 4), 2);
 }
+
+#[test]
+fn test_split_by_empty() {
+    let values: Vec<char> = "01".chars().collect();
+    assert_eq!(values, vec!['0', '1']);
+}
+
+#[test]
+fn test_parsing() {
+    assert_eq!(
+        ParamModes::new("1002"),
+        ParamModes {
+            code: Some(2),
+            vals: vec![1, 0],
+        }
+    );
+    assert_eq!(
+        ParamModes::new("2"),
+        ParamModes {
+            code: Some(2),
+            vals: vec![]
+        }
+    );
+
+    assert_eq!(
+        ParamModes::new("099"),
+        ParamModes {
+            code: Some(99),
+            vals: vec![0]
+        }
+    );
+}
