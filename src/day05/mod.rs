@@ -47,7 +47,7 @@ pub fn intcompute(regs: &mut Vec<usize>) -> Vec<usize> {
 
     loop {
         let opcode_iter = ParamModes::new(&regs.get(index).unwrap().to_string());
-        match opcode_iter.code {
+        match opcode_iter.opcode {
             Some(1) => compute_binop(regs, &mut index, plus),
             Some(2) => compute_binop(regs, &mut index, times),
             Some(3) => compute_unop(regs, &mut index, &mut do_input),
@@ -65,8 +65,8 @@ use std::iter::Iterator;
 /// vals contains the parameter modes from right to left
 #[derive(Debug, PartialEq, Eq)]
 struct ParamModes {
-    pub code: Option<usize>,
-    vals: Vec<usize>,
+    pub opcode: Option<usize>,
+    param_modes: Vec<usize>,
 }
 
 use std::convert::TryFrom;
@@ -81,29 +81,28 @@ impl ParamModes {
 
         // the digits, left -> right
         let values = Vec::from_iter(parammodes_and_opcode.chars());
+        let length = values.len();
 
-        let opcode = match values[..] {
-            [.., d1, d2] => vec![d1, d2]
-                .into_iter()
-                .collect::<String>()
-                .parse::<usize>()
-                .ok(),
-            [.., d] => d.to_string().parse::<usize>().ok(),
-            _ => None,
-        };
-
-        let elems = values.len();
-        let param_modes = match values.len() {
-            2..=usize::MAX => {
-                Vec::from_iter(values.into_iter().take(elems - 2).map(parse_to_usize))
-            }
-            _ => Vec::new(),
-        };
-
-        return ParamModes {
-            code: opcode,
-            vals: param_modes,
-        };
+        match values[..] {
+            [.., d1, d2] => ParamModes {
+                opcode: vec![d1, d2]
+                    .into_iter()
+                    .collect::<String>()
+                    .parse::<usize>()
+                    .ok(),
+                param_modes: Vec::from_iter(
+                    values.into_iter().take(length - 2).map(parse_to_usize),
+                ),
+            },
+            [d] => ParamModes {
+                opcode: d.to_string().parse::<usize>().ok(),
+                param_modes: vec![],
+            },
+            _ => ParamModes {
+                opcode: None,
+                param_modes: vec![],
+            },
+        }
     }
 }
 
