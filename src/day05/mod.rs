@@ -36,6 +36,8 @@ pub fn intcompute(regs: &mut Vec<i32>) -> Vec<i32> {
     let do_output = |vec: &mut Vec<i32>, target: usize| {
         println!("{}", try_index_once(vec, target));
     };
+    let lt = |n1, n2| if n1 < n2 { 1 } else { 0 };
+    let eq = |n1, n2| if n1 == n2 { 1 } else { 0 };
 
     loop {
         let opcode_iter = ParamModes::new(&regs.get(index).unwrap().to_string());
@@ -54,9 +56,35 @@ pub fn intcompute(regs: &mut Vec<i32>) -> Vec<i32> {
                 &mut index,
                 do_output,
             ),
+            Some(5) => jump_if_zero(true, regs, &mut opcode_iter.param_modes.iter(), &mut index),
+            Some(6) => jump_if_zero(false, regs, &mut opcode_iter.param_modes.iter(), &mut index),
+            Some(7) => compute_binop(regs, &mut opcode_iter.param_modes.iter(), &mut index, lt),
+            Some(8) => compute_binop(regs, &mut opcode_iter.param_modes.iter(), &mut index, eq),
             Some(99) => return regs.to_vec(),
-            Some(op @ _) => panic!("received unknown opcode: {}", op),
+            Some(op @ _) => panic!("received unknown opcode: {}", op,),
             None => panic!("expected instruction, but found none"),
+        }
+    }
+}
+
+// if the provided is or is not zero (according to yes), then set the instruction pointer.
+fn jump_if_zero(
+    yes: bool,
+    regs: &mut Vec<i32>,
+    param_modes: &mut std::slice::Iter<'_, usize>,
+    index: &mut usize,
+) -> () {
+    let cond_value = get_param(regs, param_modes.next(), *index + 1);
+    let target = get_param(regs, param_modes.next(), *index + 2);
+
+    let cond = !(regs[cond_value] == 0);
+    match [yes, cond] {
+        [true, true] | [false, false] => {
+            *index = usize::try_from(regs[target]).unwrap();
+        }
+        _ => {
+            // increment by instruction (+1) cond (+1) and target (+1)
+            *index += 3;
         }
     }
 }
