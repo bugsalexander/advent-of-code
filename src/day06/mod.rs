@@ -1,6 +1,6 @@
 mod tests;
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::iter::FromIterator;
 use std::str::FromStr;
 
@@ -34,8 +34,8 @@ impl FromStr for Orbits {
 }
 
 /// produce a tree structure of the pairs
-fn grow_tree(orbits: Orbits) -> () {
-    let mut tree = HashMap::new();
+fn count_orbits(orbits: Orbits) -> u64 {
+    let mut tree: HashMap<&str, HashSet<&str>> = HashMap::new();
 
     for pair in orbits.0.iter() {
         // if first or second is unknown, then add it.
@@ -43,8 +43,30 @@ fn grow_tree(orbits: Orbits) -> () {
         insert_if_new(&mut tree, &pair.sat, HashSet::new());
 
         // add the second as an orbiter of the first
-        tree.get_mut(&pair.com).unwrap().insert(&pair.sat);
+        let com: &str = &pair.com;
+        tree.get_mut(com).unwrap().insert(&pair.sat);
     }
+
+    let mut total: u64 = 0;
+    let mut cur_distance = 0;
+    let mut paths = VecDeque::new();
+    paths.push_back("COM");
+    // while we have things in the queue, count
+    while !paths.is_empty() {
+        let mut next_paths = VecDeque::new();
+        // for each thing in the queue
+        for value in paths.iter() {
+            // add neighbors to next, increment total by count
+            for neighbor in tree.get(*value).unwrap().iter() {
+                next_paths.push_back(*neighbor)
+            }
+            total += cur_distance;
+        }
+        cur_distance += 1;
+        paths = next_paths;
+    }
+
+    total
 }
 
 /// inserts a key with specified value into the hashmap, if the key is new.
@@ -59,4 +81,8 @@ where
             map.insert(key, value);
         }
     }
+}
+
+pub fn parse_and_compute(input: &str) -> u64 {
+    count_orbits(input.parse::<Orbits>().unwrap())
 }
