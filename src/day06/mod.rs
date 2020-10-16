@@ -5,10 +5,10 @@ use std::iter::FromIterator;
 use std::str::FromStr;
 
 /// use the newtype pattern to do parsing
-struct Orbits(pub Vec<ComSat>);
-struct ComSat {
-    com: String,
-    sat: String,
+pub struct Orbits(pub Vec<ComSat>);
+pub struct ComSat {
+    pub com: String,
+    pub sat: String,
 }
 
 /// parse a string of orbits of the form xxx)yyy\n... to
@@ -39,8 +39,12 @@ fn count_orbits(orbits: Orbits) -> u64 {
 
     for pair in orbits.0.iter() {
         // if first or second is unknown, then add it.
-        insert_if_new(&mut tree, &pair.com, HashSet::new());
-        insert_if_new(&mut tree, &pair.sat, HashSet::new());
+        if let None = tree.get(&*pair.com) {
+            tree.insert(&*pair.com, HashSet::new());
+        }
+        if let None = tree.get(&*pair.sat) {
+            tree.insert(&*pair.sat, HashSet::new());
+        }
 
         // add the second as an orbiter of the first
         let com: &str = &pair.com;
@@ -69,20 +73,95 @@ fn count_orbits(orbits: Orbits) -> u64 {
     total
 }
 
-/// inserts a key with specified value into the hashmap, if the key is new.
-fn insert_if_new<K, V>(map: &mut HashMap<K, V>, key: K, value: V) -> ()
-where
-    K: std::cmp::Eq,
-    K: std::hash::Hash,
-{
-    match map.get(&key) {
-        Some(_) => {}
-        None => {
-            map.insert(key, value);
+pub fn parse_and_compute(input: &str) -> u64 {
+    count_orbits(input.parse::<Orbits>().unwrap())
+}
+
+pub fn parse_and_compute_day2(input: &str) -> u64 {
+    let orbits = input.parse::<Orbits>().unwrap();
+    bfs("YOU", "SAN", &orbits)
+}
+
+pub fn get_com<'a>(sat: &str, orbits: &'a Orbits) -> Option<&'a str> {
+    for comsat in orbits.0.iter() {
+        if comsat.sat == sat {
+            return Some(&comsat.com);
+        }
+    }
+
+    None
+}
+
+pub(crate) fn bfs(start: &str, end: &str, orbits: &Orbits) -> u64 {
+    if *start == *end {
+        return 0;
+    }
+
+    let rstart = get_com(start, orbits).unwrap();
+    let rend = get_com(end, orbits).unwrap();
+
+    let neighbors = build_undirected(&orbits);
+
+    let mut distance = 0;
+    let mut seen = HashSet::new();
+    let mut queue = HashSet::new();
+
+    // we start at ourselves
+    queue.insert(rstart);
+    seen.insert(rstart);
+
+    loop {
+        let mut next_queue = HashSet::new();
+
+        for current in queue.iter() {
+            if **current == *rend {
+                return distance;
+            } else {
+                // insert all the neighbors of current into the queue
+                // this is a safe unwrap, as if the node is in the graph, then it exists in the adjacency list
+                for neighbor in neighbors.get(current).unwrap().iter() {
+                    if !seen.contains(neighbor) {
+                        next_queue.insert(*neighbor);
+                        seen.insert(*neighbor);
+                    }
+                }
+            }
+        }
+
+        distance += 1;
+        queue = next_queue;
+
+        if queue.len() == 0 {
+            // if we haven't returned, then there is no connection between us and santa
+            panic!("there was no connection between us and santa")
         }
     }
 }
 
-pub fn parse_and_compute(input: &str) -> u64 {
-    count_orbits(input.parse::<Orbits>().unwrap())
+fn build_undirected<'a>(orbits: &'a Orbits) -> Box<HashMap<&'a str, HashSet<&'a str>>> {
+    let mut neighbors: Box<HashMap<&'a str, HashSet<&'a str>>> = Box::new(HashMap::new());
+
+    // build a graph of the neighbors
+    for pair in orbits.0.iter() {
+        // if first or second is unknown, then add it.
+        if let None = neighbors.get(&*pair.com) {
+            neighbors.insert(&*pair.com, HashSet::new());
+        }
+        if let None = neighbors.get(&*pair.sat) {
+            neighbors.insert(&*pair.sat, HashSet::new());
+        }
+
+        // note the following unwraps are okay, because here ^ we guarantee the values exist
+
+        // add the second as a neighbor of the first
+        // need to convert the String (from pair.sat) to an &str, in order to index the hashmap
+        // this can be done a few ways, see the following link:
+        // https://stackoverflow.com/questions/23975391/how-to-convert-a-string-into-a-static-str
+        neighbors.get_mut(&*pair.sat).unwrap().insert(&pair.com);
+
+        // add the first as a neighbor of the second
+        neighbors.get_mut(&*pair.com).unwrap().insert(&pair.sat);
+    }
+
+    return neighbors;
 }

@@ -15,4 +15,9 @@ fn main() {
     let mut input = read_to_string("./input/06").unwrap();
     let result = day06::parse_and_compute(&mut input);
     println!("{}", result);
+
+    let orbits = input.parse::<day06::Orbits>().unwrap();
+
+    let result = day06::bfs("YOU", "SAN", &orbits);
+    println!("{}", result);
 }
