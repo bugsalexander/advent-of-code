@@ -1,5 +1,7 @@
 # Advent of Code Java Starter project
 
+credit to https://github.com/dave-burke/advent-of-code-java-starter/
+
 A project to get you started solving [Advent of Code](https://adventofcode.com/) challenge in Java.
 
 ## Architecture
