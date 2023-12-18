@@ -16,10 +16,8 @@ repositories {
 }
 
 dependencies {
-    // Use JUnit Jupiter for testing.
-    testImplementation(libs.junit.jupiter)
-
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    // Use TestNG for testing.
+    testImplementation("org.testng:testng:7.7.0")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -35,6 +33,6 @@ application {
 }
 
 tasks.named<Test>("test") {
-    // Use JUnit Platform for unit tests.
-    useJUnitPlatform()
+    // Use TestNG for unit tests.
+    useTestNG()
 }

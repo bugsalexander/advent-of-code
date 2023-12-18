@@ -2,9 +2,10 @@ package aoc.day01;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.regex.MatchResult;
-import java.util.regex.Pattern;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import aoc.Day;
 
 public class Day01 implements Day {
@@ -37,24 +38,41 @@ public class Day01 implements Day {
 
     @Override
     public String part2(List<String> input) {
-        Pattern digitPattern = Pattern.compile("one|two|three|four|five|six|seven|eight|nine|[1-9]");
-
         int total = input.stream().mapToInt(line -> {
             // get the first digit occurrence (either as digit or word)
-            List<String> matches = digitPattern.matcher(line).results().map(MatchResult::group).collect(Collectors.toList());
-            int first = convertToNumber(matches.get(0));
-            int last = convertToNumber(matches.get(matches.size() - 1));
-            System.out.printf("%d %d %s\n", first, last, line);
+            int first = convertToNumber(findFirstMatch(line));
+            int last = convertToNumber(findLastMatch(line));
             return (first * 10) + last;
         }).sum();
         return String.valueOf(total);
     }
 
     private int convertToNumber(String match) {
-        if ("123456789".contains(match)) {
+        if ("1234567890".contains(match)) {
             return Integer.parseInt(match);
         } else {
             return DIGIT_TO_NUMERIC.get(match);
         }
+    }
+
+    private String findFirstMatch(String line) {
+        return IntStream.range(0, line.length()).mapToObj(line::substring).flatMap(this::mapToDigitString)
+                .findFirst().orElseThrow();
+    }
+
+    private String findLastMatch(String line) {
+        return IntStream.range(0, line.length()).boxed().sorted((a, b) -> b - a)
+                .map(line::substring).flatMap(this::mapToDigitString).findFirst().orElseThrow();
+    }
+
+    private Stream<String> mapToDigitString(String str) {
+        for (Map.Entry<String, Integer> entry : DIGIT_TO_NUMERIC.entrySet()) {
+            if (str.startsWith(entry.getKey())) {
+                return Stream.of(entry.getKey());
+            } else if (str.startsWith(String.valueOf(entry.getValue()))) {
+                return Stream.of(String.valueOf(entry.getValue()));
+            }
+        }
+        return Stream.empty();
     }
 }

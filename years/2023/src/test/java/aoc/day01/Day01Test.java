@@ -5,9 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 public class Day01Test {
 
@@ -34,5 +34,7 @@ public class Day01Test {
 
         // Then
         assertEquals("281", result);
+
+        assertEquals("91", new Day01().part2(List.of("9twonegs")));
     }
 }

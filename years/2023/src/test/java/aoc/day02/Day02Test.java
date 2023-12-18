@@ -5,11 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import aoc.day01.Day01;
+import static org.testng.Assert.assertEquals;
 
 public class Day02Test {
 
@@ -24,7 +22,7 @@ public class Day02Test {
         String result = new Day02().part1(lines);
 
         // Then
-        assertEquals("8", result);
+        assertEquals(result, "8");
     }
 
     @Test
@@ -33,6 +31,6 @@ public class Day02Test {
         String result = new Day02().part2(lines);
 
         // Then
-        assertEquals("2286", result);
+        assertEquals(result, "2286");
     }
 }
