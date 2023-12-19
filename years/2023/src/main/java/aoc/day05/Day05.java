@@ -17,8 +17,6 @@ import aoc.Day;
 
 public class Day05 implements Day {
 
-    private HashMap<TypeValuePair, TypeValuePair> lookupTable = new HashMap<>();
-
     @Override
     public String part1(List<String> input) {
         // first, chunk the input into separate "groups". each group should be separated by an empty line
@@ -26,7 +24,7 @@ public class Day05 implements Day {
 
         // should only be one line. start after "seeds: "
         List<BigInteger> seeds = parseNumbers(groups.remove(0).get(0).substring(7));
-        return computeMinLocation(seeds.iterator(), groups).toString();
+        return computeMinLocation(seeds.iterator(), groups, BigInteger.valueOf(seeds.size())).toString();
     }
 
     @Override
@@ -35,21 +33,31 @@ public class Day05 implements Day {
 
         // should only be one line. start after "seeds: "
         List<BigInteger> seedRanges = parseNumbers(groups.remove(0).get(0).substring(7));
+        BigInteger total = BigInteger.ZERO;
+        for (int i = 1; i < seedRanges.size(); i += 2) {
+            total = total.add(seedRanges.get(i));
+        }
         // this actually corresponds to a list of pairs, where the first is the start, and the second is the range
         Iterator<BigInteger> seedRangeIterator = new SeedRangeIterator(seedRanges);
 
-        return computeMinLocation(seedRangeIterator, groups).toString();
+        return computeMinLocation(seedRangeIterator, groups, total).toString();
     }
 
-    private BigInteger computeMinLocation(Iterator<BigInteger> seeds, List<List<String>> groups) {
+    private BigInteger computeMinLocation(Iterator<BigInteger> seeds, List<List<String>> groups, BigInteger total) {
         Map<SeedRequirementType, Mapping> maps = groups.stream().map(Mapping::fromString)
                 .collect(Collectors.toMap(Mapping::getSourceType, Function.identity()));
 
+        BigInteger done = BigInteger.ZERO;
         BigInteger runningMin = computeMinLocation(seeds.next(), maps);
         while (seeds.hasNext()) {
             BigInteger current = computeMinLocation(seeds.next(), maps);
             runningMin = runningMin.min(current);
+            done = done.add(BigInteger.ONE);
+            System.out.printf("%s / %s\n", done, total.toString());
         }
+
+        // 134830 / second (no caching)
+        // 108817 / second (caching)
 
         return runningMin;
     }
@@ -80,27 +88,12 @@ public class Day05 implements Day {
     }
 
     private BigInteger mapToLocation(TypeValuePair startPair, Map<SeedRequirementType, Mapping> maps) {
-        List<TypeValuePair> pairsSeen = new ArrayList<>();
-        pairsSeen.add(startPair);
         TypeValuePair currentPair = startPair;
         while (currentPair.getType() != SeedRequirementType.Location) {
-            if (lookupTable.containsKey(currentPair)) {
-                currentPair = lookupTable.get(currentPair);
-            } else {
-                Mapping mapping = maps.get(currentPair.getType());
-                BigInteger newValue = mapping.mapSourceToDestination(currentPair.getValue());
-                SeedRequirementType newType = mapping.getDestinationType();
-                currentPair = new TypeValuePair(newType, newValue);
-            }
-            pairsSeen.add(currentPair);
-        }
-
-        TypeValuePair finalResult = currentPair;
-        for (TypeValuePair pair : pairsSeen) {
-            // map them all to the final pair
-            if (!finalResult.equals(lookupTable.get(pair)) && !finalResult.equals(pair)) {
-                lookupTable.put(pair, finalResult);
-            }
+            Mapping mapping = maps.get(currentPair.getType());
+            BigInteger newValue = mapping.mapSourceToDestination(currentPair.getValue());
+            SeedRequirementType newType = mapping.getDestinationType();
+            currentPair = new TypeValuePair(newType, newValue);
         }
 
         return currentPair.getValue();
