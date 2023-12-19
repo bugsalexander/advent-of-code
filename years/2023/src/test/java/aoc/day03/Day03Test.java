@@ -26,6 +26,6 @@ public class Day03Test extends DayTest {
 
     @Override
     public void testPart2() {
-
+        testPart2("467835");
     }
 }

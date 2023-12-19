@@ -33,6 +33,10 @@ public abstract class DayTest {
         assertEquals(day.part1(lines), actual);
     }
 
+    protected void testPart2(String actual) {
+        assertEquals(day.part2(lines), actual);
+    }
+
     protected static List<String> splitInput(String input) {
         return Arrays.stream(input.split("\n")).collect(Collectors.toList());
     }
