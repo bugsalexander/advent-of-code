@@ -4,10 +4,7 @@
 
 package aoc.day04;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import aoc.Day;
 
@@ -19,14 +16,12 @@ public class Day04 implements Day {
             // each line has winning numbers, |, numbers i have
             String[] cardAndNumbers = line.split(": ");
             String[] numbers = cardAndNumbers[1].split(" \\| ");
-            Set<Integer> winningNumbers = new HashSet<>(parseNumbers(numbers[0]));
-            List<Integer> numbersIHave = parseNumbers(numbers[1]);
+            Card card = new Card(numbers[0], numbers[1]);
             int base = 1;
-            for (Integer n : numbersIHave) {
-                if (winningNumbers.contains(n)) {
-                    base *= 2;
-                }
+            for (Integer ignored : card.getWinningNumbersIHave()) {
+                base *= 2;
             }
+
             // 1 -> 0, 2 -> 1, 4 -> 2, etc
             return base / 2;
         }).sum();
@@ -35,12 +30,24 @@ public class Day04 implements Day {
 
     @Override
     public String part2(List<String> input) {
-        return null;
-    }
+        List<CardCount> cards = input.stream().map(line -> {
+            String[] cardAndNumbers = line.split(": ");
+            String[] numbers = cardAndNumbers[1].split(" \\| ");
+            Card card = new Card(numbers[0], numbers[1]);
+            return new CardCount(card, 1);
+        }).collect(Collectors.toList());
 
-    private List<Integer> parseNumbers(String s) {
-        return Arrays.stream(s.split(" ")).filter(ss -> !ss.isEmpty())
-                .map(Integer::parseInt)
-                .collect(Collectors.toList());
+        for (int i = 0; i < cards.size(); i += 1) {
+            CardCount c = cards.get(i);
+            int winners = c.getCard().getWinningNumbersIHave().size();
+            // starting at the next card, going until we either hit the end, or the # of winners
+            for (int toIncrementIdx = i + 1; toIncrementIdx < Math.min(cards.size(), i + 1 + winners); toIncrementIdx += 1) {
+                CardCount cardToIncrement = cards.get(toIncrementIdx);
+                // increment by the number of cards we have
+                cardToIncrement.setCount(cardToIncrement.getCount() + c.getCount());
+            }
+        }
+        int total = cards.stream().mapToInt(CardCount::getCount).sum();
+        return String.valueOf(total);
     }
 }

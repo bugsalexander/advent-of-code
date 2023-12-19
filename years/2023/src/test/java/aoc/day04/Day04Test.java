@@ -25,6 +25,6 @@ public class Day04Test extends DayTest {
 
     @Test
     public void testPart2() {
-
+        testPart2("30");
     }
 }
