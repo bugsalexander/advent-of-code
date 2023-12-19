@@ -4,6 +4,7 @@
 
 package aoc.day05;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,19 +58,21 @@ public class Mapping {
         SeedRequirementType dest = SeedRequirementType.fromString(titleParts[2]);
         List<SourceDestinationRange> ranges = strings.stream().map(s -> {
             // destStart sourceStart range (how long each mapping is)
-            List<Integer> parts = Day05.parseNumbers(s);
+            List<BigInteger> parts = Day05.parseNumbers(s);
             return new SourceDestinationRange(parts.get(0), parts.get(1), parts.get(2));
         }).collect(Collectors.toList());
 
         return new Mapping(source, dest, ranges);
     }
 
-    public int mapSourceToDestination(int currentValue) {
+    public BigInteger mapSourceToDestination(BigInteger currentValue) {
         for (SourceDestinationRange range : this.ranges) {
-            if (range.getSourceStart() <= currentValue && currentValue < range.getSourceStart() + range.getRange()) {
+            boolean sourceLessThanEqualToCurrent = range.getSourceStart().compareTo(currentValue) <= 0;
+            boolean currentLessThanSourceEnd = currentValue.compareTo(range.getSourceStart().add(range.getRange())) < 0;
+            if (sourceLessThanEqualToCurrent && currentLessThanSourceEnd) {
                 // then it matches
-                int offset = currentValue - range.getSourceStart();
-                return range.getDestinationStart() + offset;
+                BigInteger offset = currentValue.subtract(range.getSourceStart());
+                return range.getDestinationStart().add(offset);
             }
         }
 

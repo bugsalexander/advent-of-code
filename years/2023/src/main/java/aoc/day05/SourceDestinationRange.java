@@ -4,40 +4,42 @@
 
 package aoc.day05;
 
-public class SourceDestinationRange {
-    private int destinationStart;
-    private int sourceStart;
-    private int range;
+import java.math.BigInteger;
 
-    public SourceDestinationRange(int destinationStart, int sourceStart, int range) {
+public class SourceDestinationRange {
+    private BigInteger destinationStart;
+    private BigInteger sourceStart;
+    private BigInteger range;
+
+    public SourceDestinationRange(BigInteger destinationStart, BigInteger sourceStart, BigInteger range) {
         this.destinationStart = destinationStart;
         this.sourceStart = sourceStart;
         this.range = range;
     }
 
-    public int getDestinationStart() {
+    public BigInteger getDestinationStart() {
         return destinationStart;
     }
 
-    public SourceDestinationRange setDestinationStart(int destinationStart) {
+    public SourceDestinationRange setDestinationStart(BigInteger destinationStart) {
         this.destinationStart = destinationStart;
         return this;
     }
 
-    public int getSourceStart() {
+    public BigInteger getSourceStart() {
         return sourceStart;
     }
 
-    public SourceDestinationRange setSourceStart(int sourceStart) {
+    public SourceDestinationRange setSourceStart(BigInteger sourceStart) {
         this.sourceStart = sourceStart;
         return this;
     }
 
-    public int getRange() {
+    public BigInteger getRange() {
         return range;
     }
 
-    public SourceDestinationRange setRange(int range) {
+    public SourceDestinationRange setRange(BigInteger range) {
         this.range = range;
         return this;
     }

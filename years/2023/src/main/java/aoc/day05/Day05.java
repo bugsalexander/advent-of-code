@@ -36,13 +36,16 @@ public class Day05 implements Day {
         }
 
         // should only be one line. start after "seeds: "
-        List<Integer> seeds = parseNumbers(groups.remove(0).get(0).substring(7));
+        List<BigInteger> seeds = parseNumbers(groups.remove(0).get(0).substring(7));
         Map<SeedRequirementType, Mapping> maps = groups.stream().map(Mapping::fromString)
                 .collect(Collectors.toMap(Mapping::getSourceType, Function.identity()));
 
-        int lowestLocation = seeds.stream().mapToInt(seed -> mapToLocation(seed, SeedRequirementType.Seed, maps)).min().orElseThrow();
+        BigInteger lowestLocation = seeds.stream()
+                .map(seed -> mapToLocation(seed, SeedRequirementType.Seed, maps))
+                .reduce(BigInteger::min)
+                .orElseThrow();
 
-        return String.valueOf(lowestLocation);
+        return lowestLocation.toString();
     }
 
     @Override
@@ -50,17 +53,17 @@ public class Day05 implements Day {
         return null;
     }
 
-    private int mapToLocation(int currentValue, SeedRequirementType currentType, Map<SeedRequirementType, Mapping> maps) {
+    private BigInteger mapToLocation(BigInteger currentValue, SeedRequirementType currentType, Map<SeedRequirementType, Mapping> maps) {
         if (currentType == SeedRequirementType.Location) {
             return currentValue;
         }
 
         Mapping mapping = maps.get(currentType);
-        int newValue = mapping.mapSourceToDestination(currentValue);
+        BigInteger newValue = mapping.mapSourceToDestination(currentValue);
         return mapToLocation(newValue, mapping.getDestinationType(), maps);
     }
 
-    public static List<Integer> parseNumbers(String s) {
-        return Arrays.stream(s.split(" ")).map(Integer::parseInt).collect(Collectors.toList());
+    public static List<BigInteger> parseNumbers(String s) {
+        return Arrays.stream(s.split(" ")).map(BigInteger::new).collect(Collectors.toList());
     }
 }
