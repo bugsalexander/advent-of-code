@@ -4,12 +4,9 @@
 
 package aoc;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 
@@ -22,12 +19,6 @@ public abstract class DayTest {
         this.day = day;
         this.lines = splitInput(input);
     }
-
-    @Test
-    public abstract void testPart1();
-
-    @Test
-    public abstract void testPart2();
 
     protected void testPart1(String actual) {
         assertEquals(day.part1(lines), actual);

@@ -4,10 +4,9 @@
 
 package aoc.day03;
 
-import aoc.Day;
-import aoc.DayTest;
-
 import org.testng.annotations.Test;
+
+import aoc.DayTest;
 
 public class Day03Test extends DayTest {
 
@@ -24,7 +23,7 @@ public class Day03Test extends DayTest {
         testPart1("4361");
     }
 
-    @Override
+    @Test
     public void testPart2() {
         testPart2("467835");
     }
