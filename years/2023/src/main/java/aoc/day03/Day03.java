@@ -32,9 +32,9 @@ public class Day03 implements Day {
             for (int col = 0; col < grid[0].length; col += 1) {
                 if (Character.isDigit(grid[row][col]) && !hasSeen(row, col, seen)) {
                     NumberIndexRange found = getNumberIndexRange(row, col, grid);
+                    seen.get(row).add(found);
                     if (isBorderedBySymbol(row, found, grid)) {
                         total += found.getValue();
-                        seen.get(row).add(found);
                     }
                 }
             }
@@ -55,14 +55,13 @@ public class Day03 implements Day {
     private NumberIndexRange getNumberIndexRange(int row, int col, char[][] grid) {
         int value = 0;
         // assume we are starting at the leftmost number
-        int startIndex = col;
-        int endIndex = col;
-        while (Character.isDigit(grid[row][endIndex]) && endIndex < grid[row].length) {
-            endIndex += 1;
-            value = (value * 10) + grid[row][endIndex];
+        int current = col;
+        while (current < grid[row].length && Character.isDigit(grid[row][current])) {
+            value = (value * 10) + Character.getNumericValue(grid[row][current]);
+            current += 1;
         }
 
-        return new NumberIndexRange(value, startIndex, endIndex);
+        return new NumberIndexRange(value, col, current - 1);
     }
 
     private boolean isBorderedBySymbol(int row, NumberIndexRange found, char[][] grid) {
