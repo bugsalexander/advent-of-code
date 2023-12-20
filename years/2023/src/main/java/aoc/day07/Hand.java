@@ -5,13 +5,9 @@
 package aoc.day07;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -25,11 +21,22 @@ public class Hand implements Comparable<Hand> {
         for (Card c : cards) {
             counts.compute(c, (_c, count) -> count != null ? count + 1 : 1);
         }
+        Integer jokers = counts.remove(Card.Joker);
         // sorted in ascending order
         List<CardCount> cardsOrderedByCount = counts.entrySet().stream()
                 .sorted((e1, e2) -> e2.getValue() - e1.getValue())
                 .map(e -> new CardCount(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
+        if (jokers != null) {
+            if (cardsOrderedByCount.isEmpty()) {
+                // add 5 aces lmao
+                cardsOrderedByCount.add(new CardCount(Card.Ace, jokers));
+            } else {
+                // increment the count of the first cards ordered by count by jokers
+                cardsOrderedByCount.get(0).setCount(cardsOrderedByCount.get(0).getCount() + jokers);
+            }
+        }
+
         // find the matching hand type
         this.handType = Arrays.stream(HandType.values()).filter(ht ->
                 ht.getNumSame().length == cardsOrderedByCount.size()

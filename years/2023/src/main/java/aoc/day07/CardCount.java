@@ -6,7 +6,7 @@ package aoc.day07;
 
 public class CardCount {
     private final Card card;
-    private final int count;
+    private int count;
 
     public CardCount(Card card, int count) {
         this.card = card;
@@ -19,5 +19,10 @@ public class CardCount {
 
     public int getCount() {
         return count;
+    }
+
+    public CardCount setCount(int count) {
+        this.count = count;
+        return this;
     }
 }

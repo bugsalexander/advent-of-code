@@ -14,7 +14,26 @@ public class Day07 implements Day {
     public String part1(List<String> input) {
         // list of hands, order them by hands
         // card types are AKQJT98765432
-        List<HandAndBid> hands = parse(input);
+        List<HandAndBid> hands = parse(input, false);
+        return getTotalValue(hands);
+    }
+
+    @Override
+    public String part2(List<String> input) {
+        List<HandAndBid> hands = parse(input, true);
+        return getTotalValue(hands);
+    }
+
+    private List<HandAndBid> parse(List<String> lines, boolean useJoker) {
+        return lines.stream().map(l -> {
+            List<String> parts = Arrays.stream(l.split(" ")).filter(s -> !s.isEmpty()).collect(Collectors.toList());
+            Hand hand = new Hand(parts.get(0).chars().mapToObj(c -> Card.fromChar((char) c, useJoker)).toArray(Card[]::new));
+            int bid = Integer.parseInt(parts.get(1));
+            return new HandAndBid(hand, bid);
+        }).collect(Collectors.toList());
+    }
+
+    private String getTotalValue(List<HandAndBid> hands) {
         hands.sort(null);
         int total = 0;
         for (int i = 0; i < hands.size(); i += 1) {
@@ -24,19 +43,5 @@ public class Day07 implements Day {
         }
 
         return String.valueOf(total);
-    }
-
-    @Override
-    public String part2(List<String> input) {
-        return null;
-    }
-
-    private List<HandAndBid> parse(List<String> lines) {
-        return lines.stream().map(l -> {
-            List<String> parts = Arrays.stream(l.split(" ")).filter(s -> !s.isEmpty()).collect(Collectors.toList());
-            Hand hand = new Hand(parts.get(0).chars().mapToObj(c -> Card.fromChar((char) c)).toArray(Card[]::new));
-            int bid = Integer.parseInt(parts.get(1));
-            return new HandAndBid(hand, bid);
-        }).collect(Collectors.toList());
     }
 }

@@ -17,7 +17,8 @@ public enum Card {
     Five('5'),
     Four('4'),
     Three('3'),
-    Two('2');
+    Two('2'),
+    Joker('J');
     
     private final char character;
 
@@ -29,7 +30,10 @@ public enum Card {
         return character;
     }
 
-    public static Card fromChar(char c) {
+    public static Card fromChar(char c, boolean useJoker) {
+        if (useJoker && Joker.getCharacter() == c) {
+            return Joker;
+        }
         for (Card card : Card.values()) {
             if (card.getCharacter() == c) {
                 return card;
