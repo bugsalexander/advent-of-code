@@ -29,4 +29,11 @@ public class Day08Test extends DayTest {
         String input = "LLR\n" + "\n" + "AAA = (BBB, BBB)\n" + "BBB = (AAA, ZZZ)\n" + "ZZZ = (ZZZ, ZZZ)";
         assertEquals(day.part1(splitInput(input)), "6");
     }
+
+    @Test
+    public void part2Test1() {
+        String input = "LR\n" + "\n" + "11A = (11B, XXX)\n" + "11B = (XXX, 11Z)\n" + "11Z = (11B, XXX)\n" + "22A = (22B, XXX)\n" + "22B = (22C, 22C)\n"
+                + "22C = (22Z, 22Z)\n" + "22Z = (22B, 22B)\n" + "XXX = (XXX, XXX)";
+        assertEquals(day.part2(splitInput(input)), "6");
+    }
 }
