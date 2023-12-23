@@ -19,4 +19,10 @@ public class Day09Test extends DayTest {
         String input = "0 3 6 9 12 15\n" + "1 3 6 10 15 21\n" + "10 13 16 21 30 45";
         testPart1(input, "114");
     }
+
+    @Test
+    public void testPart2() {
+        String input = "0 3 6 9 12 15\n" + "1 3 6 10 15 21\n" + "10 13 16 21 30 45";
+        testPart2(input, "2");
+    }
 }
