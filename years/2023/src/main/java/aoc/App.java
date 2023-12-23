@@ -20,6 +20,7 @@ import aoc.day04.Day04;
 import aoc.day05.Day05;
 import aoc.day06.Day06;
 import aoc.day07.Day07;
+import aoc.day08.Day08;
 
 public class App {
 
@@ -34,6 +35,7 @@ public class App {
         DAYS.put(5, new Day05());
         DAYS.put(6, new Day06());
         DAYS.put(7, new Day07());
+        DAYS.put(8, new Day08());
     }
 
     private static List<String> loadInput(int day){

@@ -12,7 +12,7 @@ import static org.testng.Assert.assertEquals;
 
 public abstract class DayTest {
 
-    private final Day day;
+    protected final Day day;
     private final List<String> lines;
 
     protected DayTest(Day day, String input) {
