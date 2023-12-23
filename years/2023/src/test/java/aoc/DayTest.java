@@ -13,19 +13,31 @@ import static org.testng.Assert.assertEquals;
 public abstract class DayTest {
 
     protected final Day day;
-    private final List<String> lines;
+    private final String defaultInput;
 
-    protected DayTest(Day day, String input) {
+    protected DayTest(Day day) {
+        this(day, null);
+    }
+
+    protected DayTest(Day day, String defaultInput) {
         this.day = day;
-        this.lines = splitInput(input);
+        this.defaultInput = defaultInput;
     }
 
     protected void testPart1(String actual) {
-        assertEquals(day.part1(lines), actual);
+        testPart1(defaultInput, actual);
+    }
+
+    protected void testPart1(String input, String expected) {
+        assertEquals(day.part1(splitInput(input)), expected);
     }
 
     protected void testPart2(String actual) {
-        assertEquals(day.part2(lines), actual);
+        testPart2(defaultInput, actual);
+    }
+
+    protected void testPart2(String input, String expected) {
+        assertEquals(day.part2(splitInput(input)), expected);
     }
 
     protected static List<String> splitInput(String input) {
