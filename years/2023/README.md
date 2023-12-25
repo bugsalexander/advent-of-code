@@ -10,4 +10,14 @@ it's been about 12 minutes so far, and 8/10 tasks are completed. so it will prob
 
 jk it took 52 mins. slowed down a lot at the end, not sure why
 
+### day 10 part 2
 
+this was the first algorithmically tricky one. my initial instinct after finishing part1, was to
+try and re-use the loop somehow to calculate area contained in the loop.
+
+i was trying to go in slices of the loop, starting/stopping a count as we iterate through the
+slice of the loop. unfortunately, I don't believe this actually is possible, and after trying
+it out, i gave up.
+
+i was trying to avoid having to just do floodfill with some math, but that ended up being the way
+that i solved the problem.
