@@ -40,4 +40,8 @@ public enum TileType {
     public Optional<Pipe> getPipe() {
         return Optional.ofNullable(pipe);
     }
+
+    public char getChar() {
+        return c;
+    }
 }

@@ -6,7 +6,6 @@ package aoc.day10;
 
 import aoc.util.Pair;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -14,6 +13,7 @@ public class Tile {
     private final TileType tileType;
     private Pipe pipe;
     private final Coord coord;
+    private List<Pair<Direction, Tile>> connections;
 
 
     public Tile(TileType tileType, Coord coord) {
@@ -50,7 +50,7 @@ public class Tile {
             return neighbors.stream().filter(this::isTileConnectedToUs).collect(Collectors.toList());
         }
         // we are connected to them if our connections include them
-        return neighbors.stream().filter(pair -> getPipeDirections().contains(pair.getKey())).collect(Collectors.toList());
+        return neighbors.stream().filter(pair -> getPipeDirections().contains(pair.getFirst())).collect(Collectors.toList());
     }
 
     @Override
@@ -68,10 +68,27 @@ public class Tile {
     }
 
     private boolean isTileConnectedToUs(Pair<Direction, Tile> pair) {
-        if (pair.getValue().getPipe().isEmpty()) {
+        if (pair.getSecond().getPipe().isEmpty()) {
             return false;
         }
         // the tile is "connected" to us if the tile is connected to the opposite the direction the tile is in (which is us)
-        return pair.getValue().getPipeDirections().contains(pair.getKey().getOpposite());
+        return pair.getSecond().getPipeDirections().contains(pair.getFirst().getOpposite());
+    }
+
+    public List<Pair<Direction, Tile>> getConnections() {
+        return connections;
+    }
+
+    public Tile setConnections(List<Pair<Direction, Tile>> connections) {
+        if (connections.size() != 2) {
+            throw new IllegalStateException("expected connections be exactly two");
+        }
+        this.connections = connections;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[%s] %s", pipe != null ? pipe.toString() : "", coord.toString());
     }
 }

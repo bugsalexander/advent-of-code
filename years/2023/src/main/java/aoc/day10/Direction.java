@@ -4,6 +4,7 @@
 
 package aoc.day10;
 
+import aoc.util.Pair;
 import java.util.Arrays;
 
 /**
@@ -44,5 +45,9 @@ public enum Direction {
 
     public Direction getOpposite() {
         return opposite;
+    }
+
+    public Pair<Double, Double> asVector() {
+        return Pair.of((double) rowDiff, (double) colDiff);
     }
 }

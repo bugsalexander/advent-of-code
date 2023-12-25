@@ -10,15 +10,15 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import aoc.Day;
 import aoc.util.Pair;
-
-import org.apache.commons.collections4.SetUtils;
 
 public class Day10 implements Day {
     @Override
@@ -41,36 +41,92 @@ public class Day10 implements Day {
             List<Tile> cols = columnToRowTilesInLoop.computeIfAbsent(tileInLoop.getCoord().getRow(), v -> new ArrayList<>());
             cols.add(tileInLoop);
         });
+        columnToRowTilesInLoop.values().forEach(list -> list.sort(Comparator.comparingInt(a -> a.getCoord().getCol())));
 
-        int total = 0;
-        for (List<Tile> cols : columnToRowTilesInLoop.values()) {
-            // we want the spaces between "Segments"
-            // start counting when we encounter an end joint: |, 7, J
-            // stop counting when we encounter a start joint: |, F, L
-            Set<Pipe> startPipes = Set.of(Pipe.Vertical, Pipe.BendSouthWest, Pipe.BendNorthWest);
-            Set<Pipe> stopPipes = Set.of(Pipe.Vertical, Pipe.BendSouthEast, Pipe.BendNorthEast);
-            Set<Pipe> significantPipes = SetUtils.union(startPipes, stopPipes);
-            List<Tile> joints = cols.stream()
-                    .filter(t -> significantPipes.contains(t.getPipe().orElseThrow()))
-                    .sorted(Comparator.comparingInt(a -> a.getCoord().getCol()))
-                    .collect(Collectors.toList());
+        // for each tile in loop, compute a direction representing which way is inwards
+        // start at the top left, where the inward direction is to the right and down
+        Tile prevTile = columnToRowTilesInLoop.entrySet().stream()
+                .min(Comparator.comparingInt(Map.Entry::getKey)).orElseThrow()
+                .getValue().get(0);
+        Pair<Direction, Tile> currTile = prevTile.getConnections().get(0);
+        // represent a radial direction as a pair of integers (row, col) representing a vector
+        HashMap<Tile, Pair<Integer, Integer>> tileToInwardVectors = new HashMap<>();
+        tileToInwardVectors.put(prevTile, Pair.of(1, 1));
+        if (prevTile.getPipe().orElseThrow() != Pipe.BendSouthEast) {
+            throw new IllegalStateException("the top row leftmost pipe should always be south east");
+        }
 
-            Tile prevSignificantTile = joints.get(0);
-            boolean inside = startPipes.contains(prevSignificantTile.getPipe().orElseThrow());
-            for (int i = 1; i < joints.size(); i += 1) {
-                Tile t = joints.get(i);
-                Pipe p = t.getPipe().orElseThrow();
-                if (stopPipes.contains(p) && inside) {
-                    total += t.getCoord().getCol() - prevSignificantTile.getCoord().getCol() - 1;
-                    inside = false;
-                    prevSignificantTile = t;
-                } else if (startPipes.contains(p) && !inside) {
-                    inside = true;
-                    prevSignificantTile = t;
-                }
+        // maybe we can just do this with vectors!
+        while (currTile != null) {
+            // the orthodox interior-facing vector of the next tile is the one that has the higher dot product with the current interior direction
+            Pair<Integer, Integer> interiorPointingVector = tileToInwardVectors.get(prevTile);
+            Direction offset = currTile.getFirst();
+            Pair<Integer, Integer> similarVector = getPipeOrthodoxVectors(currTile.getSecond().getPipe().orElseThrow()).stream()
+                    // adjust the vectors by the position diff to make the dot product more accurate
+                    .map(vector -> Pair.of(vector, dotProduct(unitVectorAdd(vector, offset), interiorPointingVector)))
+                    .max(Comparator.comparingDouble(Pair::getSecond))
+                    .map(Pair::getFirst)
+                    .orElseThrow();
+            tileToInwardVectors.put(currTile.getSecond(), similarVector);
+            /*
+            inward vector = (-1, 1)
+            diff adjust = (1, 0)
+            opposite vectors = (-1, -1), (1, 1)
+            adjusted vectors = (0, -1), (2, 1)
+             */
+
+            prevTile = currTile.getSecond();
+            currTile = currTile.getSecond().getConnections().stream()
+                    .filter(p -> !tileToInwardVectors.containsKey(p.getSecond())).findFirst().orElse(null);
+        }
+
+        // now we conduct floodfill. add neighbors
+        HashSet<Coord> seen = new HashSet<>();
+        Stack<Tile> stack = new Stack<>();
+        seen.add(start.getCoord());
+        stack.push(start);
+        while (!stack.isEmpty()) {
+            Tile tile = stack.pop();
+            List<Pair<Direction, Tile>> neighbors = getNeighbors(tile, tiles);
+            if (tileToInwardVectors.containsKey(tile)) {
+                // if this is an edge, filter out the neighbors that are not in the inward direction
+                Pair<Integer, Integer> inwardVector = tileToInwardVectors.get(tile);
+                // they are in the direction of the inward vector if the dot product is >= 0 ("sameness" is positive)
+                List<Pair<Direction, Tile>> similarNeighbors = neighbors.stream()
+                        .filter(p -> !seen.contains(p.getSecond().getCoord())
+                                // either is an inward tile, or is part of the loop
+                                && (dotProduct(p.getFirst().asVector(), inwardVector) >= 0 || tileToInwardVectors.containsKey(p.getSecond())))
+                        .collect(Collectors.toList());
+                similarNeighbors.forEach(p -> {
+                    seen.add(p.getSecond().getCoord());
+                    stack.push(p.getSecond());
+                });
+            } else {
+                // if is a contained tile, just add everything not yet seen
+                neighbors.stream().filter(p -> !seen.contains(p.getSecond().getCoord())).forEach(p -> {
+                    seen.add(p.getSecond().getCoord());
+                    stack.push(p.getSecond());
+                });
             }
         }
-        return String.valueOf(total);
+
+        for (int row = 0; row < tiles.length; row += 1) {
+            for (int col = 0; col < tiles[0].length; col += 1) {
+                if (seen.contains(new Coord(row, col))) {
+                    if (tileToInwardVectors.containsKey(tiles[row][col])) {
+//                        System.out.printf("%s ", tiles[row][col].getType().getChar());
+                        System.out.printf("%s ", stringifyVector(tileToInwardVectors.get(tiles[row][col])));
+                    } else {
+                        System.out.print(". ");
+                    }
+                } else {
+                    System.out.print("  ");
+                }
+            }
+            System.out.println();
+        }
+
+        return String.valueOf(seen.size() - tileToInwardVectors.size());
     }
 
     private Tile buildGraph(Tile[][] tiles, List<String> input) {
@@ -87,7 +143,7 @@ public class Day10 implements Day {
         }
         // set the corresponding pipe connection for start tile
         Set<Direction> ourConnections = getAttemptedConnections(Objects.requireNonNull(start), tiles)
-                .stream().map(Pair::getKey).collect(Collectors.toSet());
+                .stream().map(Pair::getFirst).collect(Collectors.toSet());
         for (Pipe pipe : Pipe.values()) {
             Set<Direction> pipeConnections = new HashSet<>(pipe.getDirections());
             if (pipeConnections.containsAll(ourConnections) && ourConnections.containsAll(pipeConnections)) {
@@ -106,13 +162,15 @@ public class Day10 implements Day {
         while (!queue.isEmpty()) {
             List<Tile> nextQueue = new ArrayList<>();
             for (Tile tile : queue) {
-                getAttemptedConnections(tile, grid).stream()
-                        .map(Pair::getValue)
+                List<Pair<Direction, Tile>> connections = getAttemptedConnections(tile, grid);
+                connections.stream()
+                        .map(Pair::getSecond)
                         .filter(t -> t != null && !seen.contains(t)).forEach(t -> {
                             nextQueue.add(t);
                             seen.add(t);
                             tileAction.accept(t);
                         });
+                tile.setConnections(connections);
             }
             queue = nextQueue;
             currentDistance += 1;
@@ -121,11 +179,14 @@ public class Day10 implements Day {
     }
 
     private List<Pair<Direction, Tile>> getAttemptedConnections(Tile t, Tile[][] grid) {
-        List<Pair<Direction, Tile>> neighboringTiles = Arrays.stream(Direction.values())
+        return t.filterAttemptedConnections(getNeighbors(t, grid));
+    }
+
+    private List<Pair<Direction, Tile>> getNeighbors(Tile t, Tile[][] grid) {
+        return Arrays.stream(Direction.values())
                 .map(d -> tileAt(t, d, grid))
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList());
-        return t.filterAttemptedConnections(neighboringTiles);
     }
 
     private Optional<Pair<Direction, Tile>> tileAt(Tile t, Direction d, Tile[][] tiles) {
@@ -135,5 +196,63 @@ public class Day10 implements Day {
             return Optional.of(Pair.of(d, tiles[row][col]));
         }
         return Optional.empty();
+    }
+
+    private List<Pair<Integer, Integer>> getPipeOrthodoxVectors(Pipe pipe) {
+        // all pipes have two directions
+        if (pipe == Pipe.Vertical) {
+            return List.of(Pair.of(0, -1), Pair.of(0, 1));
+        } else if (pipe == Pipe.Horizontal) {
+            return List.of(Pair.of(1, 0), Pair.of(-1, 0));
+        } else {
+            // add the vectors
+            List<Direction> dirs = pipe.getDirections();
+            int row = dirs.get(0).getRowDiff() + dirs.get(1).getRowDiff();
+            int col = dirs.get(0).getColDiff() + dirs.get(1).getColDiff();
+            return List.of(Pair.of(row, col), Pair.of(-row, -col));
+        }
+    }
+
+    private double dotProduct(Pair<Double, Double> v1, Pair<Integer, Integer> v2) {
+        return v1.getFirst() * v2.getFirst() + v1.getSecond() * v2.getSecond();
+    }
+
+    private String stringifyVector(Pair<Integer, Integer> v) {
+        if (v.getFirst() == 0 && v.getSecond() == 0) {
+            return "X";
+        }
+        if (v.getFirst() == 0) {
+            if (v.getSecond() < 0) {
+                return "<";
+            } else {
+                return ">";
+            }
+        } else if (v.getSecond() == 0) {
+            if (v.getFirst() < 0) {
+                return "A";
+            } else {
+                return "V";
+            }
+        } else if (v.getFirst() < 0) {
+            if (v.getSecond() < 0) {
+                return "F";
+            } else {
+                return "7";
+            }
+        } else if (v.getFirst() > 0) {
+            if (v.getSecond() < 0) {
+                return "L";
+            } else {
+                return "J";
+            }
+        }
+        throw new IllegalStateException("shouldn't get here");
+    }
+
+    private Pair<Double, Double> unitVectorAdd(Pair<Integer, Integer> vector, Direction offset) {
+        int row = vector.getFirst() - offset.getRowDiff();
+        int col = vector.getSecond() - offset.getColDiff();
+        double total = Math.sqrt(row * row + col * col);
+        return Pair.of(row / total, col / total);
     }
 }

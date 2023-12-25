@@ -39,4 +39,9 @@ public class Coord {
     public int hashCode() {
         return Objects.hash(getRow(), getCol());
     }
+
+    @Override
+    public String toString() {
+        return String.format("(%d, %d)", row, col);
+    }
 }
