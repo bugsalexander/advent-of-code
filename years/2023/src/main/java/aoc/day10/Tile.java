@@ -4,75 +4,53 @@
 
 package aoc.day10;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import aoc.util.Pair;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Tile {
-    private final Pipe pipe;
+    private final TileType tileType;
+    private Pipe pipe;
     private final Coord coord;
-    private List<Tile> neighbors;
 
 
-    public Tile(Pipe pipe, Coord coord) {
-        this.pipe = pipe;
+    public Tile(TileType tileType, Coord coord) {
+        this.tileType = tileType;
         this.coord = coord;
+        this.pipe = this.tileType.getPipe().orElse(null);
     }
 
-    public List<Tile> getNeighbors() {
-        return neighbors;
+    public TileType getType() {
+        return tileType;
     }
 
-    public Tile setNeighbors(List<Tile> neighbors) {
-        this.neighbors = neighbors;
+    public Optional<Pipe> getPipe() {
+        return Optional.ofNullable(pipe);
+    }
+
+    public List<Direction> getPipeDirections() {
+        return pipe == null ? List.of() : pipe.getDirections();
+    }
+
+    public Tile setPipe(Pipe pipe) {
+        this.pipe = pipe;
         return this;
     }
 
-    public Pipe getPipe() {
-        return pipe;
-    }
-
-    public List<Tile> getConnectedTiles(List<Tile> adjacentTiles) {
-        return getConnectedTiles(adjacentTiles.get(0), adjacentTiles.get(1), adjacentTiles.get(2), adjacentTiles.get(3));
-    }
-
-    // never eat soggy waffles!
-    public List<Tile> getConnectedTiles(Tile north, Tile east, Tile south, Tile west) {
-        switch (this.pipe) {
-        case Vertical:
-            return Arrays.asList(north, south);
-        case Horizontal:
-            return Arrays.asList(east, west);
-        case BendNorthEast:
-            return Arrays.asList(north, east);
-        case BendNorthWest:
-            return Arrays.asList(north, west);
-        case BendSouthWest:
-            return Arrays.asList(south, west);
-        case BendSouthEast:
-            return Arrays.asList(south, east);
-        case Ground:
-            return List.of();
-        case Start:
-            // check if any of the neighbors would include us as their neighbor
-            // guaranteed to not hit NPEs/infinite loops here since there should only be one start
-            List<Tile> neighbors = new ArrayList<>();
-            if (north != null && north.getConnectedTiles(null, null, this, null).contains(this)) {
-                neighbors.add(north);
-            }
-            if (east != null && east.getConnectedTiles(null, null, null, this).contains(this)) {
-                neighbors.add(east);
-            }
-            if (south != null && south.getConnectedTiles(this, null, null, null).contains(this)) {
-                neighbors.add(south);
-            }
-            if (west != null && west.getConnectedTiles(null, this, null, null).contains(this)) {
-                neighbors.add(west);
-            }
-            return neighbors;
-        default:
-            throw new IllegalStateException("shouldn't get here");
+    /**
+     * Produces the tiles that our pipe is trying to connect to.
+     * If the neighbor is returned, does not imply the neighbor is trying to connect to us.
+     * @param neighbors the neighboring tiles, and what direction they are in
+     * @return the tiles that our pipe is trying to connect to
+     */
+    public List<Pair<Direction, Tile>> filterAttemptedConnections(List<Pair<Direction, Tile>> neighbors) {
+        if (tileType == TileType.Start) {
+            return neighbors.stream().filter(this::isTileConnectedToUs).collect(Collectors.toList());
         }
+        // we are connected to them if our connections include them
+        return neighbors.stream().filter(pair -> getPipeDirections().contains(pair.getKey())).collect(Collectors.toList());
     }
 
     @Override
@@ -87,5 +65,13 @@ public class Tile {
 
     public Coord getCoord() {
         return coord;
+    }
+
+    private boolean isTileConnectedToUs(Pair<Direction, Tile> pair) {
+        if (pair.getValue().getPipe().isEmpty()) {
+            return false;
+        }
+        // the tile is "connected" to us if the tile is connected to the opposite the direction the tile is in (which is us)
+        return pair.getValue().getPipeDirections().contains(pair.getKey().getOpposite());
     }
 }

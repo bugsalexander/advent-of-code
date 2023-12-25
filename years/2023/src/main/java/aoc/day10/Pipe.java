@@ -4,32 +4,23 @@
 
 package aoc.day10;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 public enum Pipe {
-    Vertical('|'),
-    Horizontal('-'),
-    BendNorthEast('L'),
-    BendNorthWest('J'),
-    BendSouthWest('7'),
-    BendSouthEast('F'),
-    Ground('.'),
-    Start('S');
+    Vertical(Direction.North, Direction.South),
+    Horizontal(Direction.East, Direction.West),
+    BendNorthEast(Direction.North, Direction.East),
+    BendNorthWest(Direction.North, Direction.West),
+    BendSouthWest(Direction.South, Direction.West),
+    BendSouthEast(Direction.South, Direction.East);
 
-    private final char c;
+    private final List<Direction> directions;
 
-    private Pipe(char c) {
-        this.c = c;
+    Pipe(Direction... connections) {
+        this.directions = List.of(connections);
     }
 
-    public static Pipe fromChar(char c) {
-        for (Pipe pipe : Pipe.values()) {
-            if (pipe.c == c) {
-                return pipe;
-            }
-        }
-        throw new IllegalArgumentException("provided char does not correspond to any pipe");
+    public List<Direction> getDirections() {
+        return directions;
     }
 }

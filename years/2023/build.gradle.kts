@@ -15,9 +15,13 @@ repositories {
     mavenCentral()
 }
 
+// https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:what-are-dependency-configurations
 dependencies {
     // Use TestNG for testing.
     testImplementation("org.testng:testng:7.7.0")
+    // todo: learn how this works :)
+    implementation("org.apache.commons:commons-lang3:3.14.0")
+    implementation("org.apache.commons:commons-collections4:4.4")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
