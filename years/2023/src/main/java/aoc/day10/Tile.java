@@ -4,6 +4,7 @@
 
 package aoc.day10;
 
+import aoc.util.Coord;
 import aoc.util.Pair;
 import java.util.List;
 import java.util.Optional;

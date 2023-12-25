@@ -18,6 +18,7 @@ import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import aoc.Day;
+import aoc.util.Coord;
 import aoc.util.Pair;
 
 public class Day10 implements Day {

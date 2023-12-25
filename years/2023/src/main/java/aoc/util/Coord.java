@@ -2,7 +2,7 @@
  * Copyright 2023 VMware, Inc.  All rights reserved. VMware Confidential
  * *********************************************************************/
 
-package aoc.day10;
+package aoc.util;
 
 import java.util.Objects;
 
