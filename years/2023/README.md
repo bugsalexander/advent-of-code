@@ -21,3 +21,8 @@ it out, i gave up.
 
 i was trying to avoid having to just do floodfill with some math, but that ended up being the way
 that i solved the problem.
+
+this was by far the most time I've spent so far on a problem, half due to getting caught up in
+code refactors, but also I spent too much time trying to make the first way work.
+
+around 2-3 days spent total, working a couple hours a day? yeesh.
