@@ -31,3 +31,12 @@ around 2-3 days spent total, working a couple hours a day? yeesh.
 
 sort of a pain to program, lots of edge cases.
 most thorough requirement of testing/bugfixing so far.
+
+### day 12 part 2
+
+of course i tried to make my solution multithreaded first :P but after that didn't work, and
+i just converted it to dp. thankfully i had already sort of structured it in a dp-compatible
+manner. the conversion was straightforward, and after switching to biginteger (and adding ?
+in between the duplicated spring input) the solution worked.
+
+overall spent way less time than day 10 part 2. only took around an hour.
