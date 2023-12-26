@@ -23,4 +23,9 @@ public enum SpringCondition {
         }
         throw new IllegalStateException("unable to parse type from value");
     }
+
+    @Override
+    public String toString() {
+        return String.valueOf(c);
+    }
 }

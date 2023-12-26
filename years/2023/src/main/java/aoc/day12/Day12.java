@@ -46,7 +46,11 @@ public class Day12 implements Day {
         List<Integer> brokenGroups = pair.getRight();
 
         int total = pluginBrokenGroups(springs, 0, brokenGroups, 0);
-        System.out.println(total);
+        if (total > 100) {
+            System.out.printf("%s %s %d\n", springs.stream().map(Object::toString).collect(Collectors.joining()),
+                    brokenGroups.stream().map(Object::toString).collect(Collectors.joining(",")),
+                    total);
+        }
         return BigInteger.valueOf(total);
     }
 
@@ -64,10 +68,10 @@ public class Day12 implements Day {
                 }
             case Damaged:
                 // if no more broken groups left, or there is but it requires more than 1 gear, no solution
-                if (brokenGroupIndex >= brokenGroups.size() || brokenGroups.get(brokenGroupIndex) != 1) {
-                    return 0;
-                } else {
+                if (brokenGroupIndex == brokenGroups.size() - 1 && brokenGroups.get(brokenGroupIndex) == 1) {
                     return 1;
+                } else {
+                    return 0;
                 }
             case Unknown:
                 // one solution if there is no group left, or a single group with size 1 left
