@@ -26,3 +26,8 @@ this was by far the most time I've spent so far on a problem, half due to gettin
 code refactors, but also I spent too much time trying to make the first way work.
 
 around 2-3 days spent total, working a couple hours a day? yeesh.
+
+### day 12 part 1
+
+sort of a pain to program, lots of edge cases.
+most thorough requirement of testing/bugfixing so far.
