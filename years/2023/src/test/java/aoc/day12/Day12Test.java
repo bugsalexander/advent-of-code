@@ -186,4 +186,9 @@ public class Day12Test extends DayTest {
     public void testEdgeCase() {
         testPart1("??.# 1,1", "2");
     }
+
+    @Test
+    public void testPart2() {
+        testPart2("525152");
+    }
 }

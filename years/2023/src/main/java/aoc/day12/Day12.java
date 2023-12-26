@@ -26,9 +26,10 @@ public class Day12 implements Day {
     public String part2(List<String> input) {
         List<Pair<List<SpringCondition>, List<Integer>>> lines = parse(input).stream()
                 .map(pair -> {
-                    List<SpringCondition> springs = new ArrayList<>();
-                    List<Integer> groups = new ArrayList<>();
-                    for (int i = 0; i < 5; i += 1) {
+                    List<SpringCondition> springs = new ArrayList<>(pair.getLeft());
+                    List<Integer> groups = new ArrayList<>(pair.getRight());
+                    for (int i = 0; i < 4; i += 1) {
+                        springs.add(SpringCondition.Unknown);
                         springs.addAll(pair.getLeft());
                         groups.addAll(pair.getRight());
                     }
