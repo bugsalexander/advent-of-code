@@ -6,10 +6,12 @@ package aoc.day12;
 
 import aoc.Day;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class Day12 implements Day {
@@ -22,7 +24,18 @@ public class Day12 implements Day {
 
     @Override
     public String part2(List<String> input) {
-        return null;
+        List<Pair<List<SpringCondition>, List<Integer>>> lines = parse(input).stream()
+                .map(pair -> {
+                    List<SpringCondition> springs = new ArrayList<>();
+                    List<Integer> groups = new ArrayList<>();
+                    for (int i = 0; i < 5; i += 1) {
+                        springs.addAll(pair.getLeft());
+                        groups.addAll(pair.getRight());
+                    }
+                    return Pair.of(springs, groups);
+                }).collect(Collectors.toList());
+        BigInteger total = countPossibleArrangements(lines);
+        return total.toString();
     }
 
     private List<Pair<List<SpringCondition>, List<Integer>>> parse(List<String> input) {
@@ -38,7 +51,7 @@ public class Day12 implements Day {
     }
 
     private BigInteger countPossibleArrangements(List<Pair<List<SpringCondition>, List<Integer>>> lines) {
-        return lines.stream().map(this::countPossibleArrangements).reduce(BigInteger.ZERO, BigInteger::add);
+        return lines.parallelStream().map(this::countPossibleArrangements).reduce(BigInteger.ZERO, BigInteger::add);
     }
 
     private BigInteger countPossibleArrangements(Pair<List<SpringCondition>, List<Integer>> pair) {
