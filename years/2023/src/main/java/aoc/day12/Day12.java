@@ -4,15 +4,15 @@
 
 package aoc.day12;
 
-import aoc.Day;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.tuple.Pair;
+
+import aoc.Day;
 
 public class Day12 implements Day {
     @Override
@@ -58,41 +58,48 @@ public class Day12 implements Day {
         List<SpringCondition> springs = pair.getLeft();
         List<Integer> brokenGroups = pair.getRight();
 
-        int total = pluginBrokenGroups(springs, 0, brokenGroups, 0);
-        if (total > 100) {
+        // one extra for brokenGroups, in the possibility where there are none left
+        BigInteger[][] dp = new BigInteger[springs.size()][brokenGroups.size() + 1];
+        for (int springIndex = springs.size() - 1; springIndex >= 0; springIndex -= 1) {
+            for (int brokenGroupIndex = brokenGroups.size(); brokenGroupIndex >= 0; brokenGroupIndex -= 1) {
+                dp[springIndex][brokenGroupIndex] = pluginBrokenGroups(springs, springIndex, brokenGroups, brokenGroupIndex, dp);
+            }
+        }
+        BigInteger total = dp[0][0];
+        if (total.compareTo(BigInteger.valueOf(1_000_000_000)) > 0) {
             System.out.printf("%s %s %d\n", springs.stream().map(Object::toString).collect(Collectors.joining()),
                     brokenGroups.stream().map(Object::toString).collect(Collectors.joining(",")),
                     total);
         }
-        return BigInteger.valueOf(total);
+        return total;
     }
 
-    private int pluginBrokenGroups(List<SpringCondition> springs, int springIndex, List<Integer> brokenGroups, int brokenGroupIndex) {
+    private BigInteger pluginBrokenGroups(List<SpringCondition> springs, int springIndex, List<Integer> brokenGroups, int brokenGroupIndex, BigInteger[][] dp) {
         // base case, we have the last spring
         if (springIndex == springs.size() - 1) {
             switch(springs.get(springIndex)) {
             case Operational:
                 if (brokenGroupIndex >= brokenGroups.size()) {
                     // if no broken groups left, yay!
-                    return 1;
+                    return BigInteger.ONE;
                 } else {
                     // we must use another broken group, but there are no more damaged gears
-                    return 0;
+                    return BigInteger.ZERO;
                 }
             case Damaged:
                 // if no more broken groups left, or there is but it requires more than 1 gear, no solution
                 if (brokenGroupIndex == brokenGroups.size() - 1 && brokenGroups.get(brokenGroupIndex) == 1) {
-                    return 1;
+                    return BigInteger.ONE;
                 } else {
-                    return 0;
+                    return BigInteger.ZERO;
                 }
             case Unknown:
                 // one solution if there is no group left, or a single group with size 1 left
                 if (brokenGroupIndex >= brokenGroups.size()
                         || (brokenGroupIndex == brokenGroups.size() - 1 && brokenGroups.get(brokenGroupIndex) == 1)) {
-                    return 1;
+                    return BigInteger.ONE;
                 } else {
-                    return 0;
+                    return BigInteger.ZERO;
                 }
             }
         }
@@ -101,48 +108,48 @@ public class Day12 implements Day {
         switch (springs.get(springIndex)) {
         case Operational:
             // we don't
-            return pluginBrokenGroups(springs, springIndex + 1, brokenGroups, brokenGroupIndex);
+            return dp[springIndex + 1][brokenGroupIndex];
         case Damaged:
-            return pluginBrokenGroup(springs, springIndex, brokenGroups, brokenGroupIndex);
+            return pluginBrokenGroup(springs, springIndex, brokenGroups, brokenGroupIndex, dp);
         case Unknown:
             // we may or may not use a broken group
-            int usingBrokenGroup = pluginBrokenGroup(springs, springIndex, brokenGroups, brokenGroupIndex);
-            int notUsingBrokenGroup = pluginBrokenGroups(springs, springIndex + 1, brokenGroups, brokenGroupIndex);
-            return usingBrokenGroup + notUsingBrokenGroup;
+            BigInteger usingBrokenGroup = pluginBrokenGroup(springs, springIndex, brokenGroups, brokenGroupIndex, dp);
+            BigInteger notUsingBrokenGroup = dp[springIndex + 1][brokenGroupIndex];
+            return usingBrokenGroup.add(notUsingBrokenGroup);
         }
         throw new IllegalStateException("to satisfy compiler");
     }
 
     // assume we must use a broken group now
-    public int pluginBrokenGroup(List<SpringCondition> springs, int springIndex, List<Integer> brokenGroups, int brokenGroupIndex) {
+    public BigInteger pluginBrokenGroup(List<SpringCondition> springs, int springIndex, List<Integer> brokenGroups, int brokenGroupIndex, BigInteger[][] dp) {
         // no more broken groups, or the size of the broken group is bigger than remaining spring slots
         if (brokenGroupIndex >= brokenGroups.size() || brokenGroups.get(brokenGroupIndex) + springIndex > springs.size()) {
-            return 0;
+            return BigInteger.ZERO;
         }
         Integer brokenGroup = brokenGroups.get(brokenGroupIndex);
         int nextIndex = springIndex + brokenGroup;
         if (nextIndex < springs.size() && springs.get(nextIndex) == SpringCondition.Damaged) {
             // the spring following the broken group must be nonexistent or operational
             // check this first since it is O(1) < O(groupSize)
-            return 0;
+            return BigInteger.ZERO;
         }
         for (SpringCondition type : springs.subList(springIndex + 1, nextIndex)) {
             if (type == SpringCondition.Operational) {
                 // if we cannot use the broken group, then we are done. zero possibilities
-                return 0;
+                return BigInteger.ZERO;
             }
         }
 
         if (nextIndex + 1 >= springs.size()) {
             if (brokenGroupIndex + 1 >= brokenGroups.size()) {
                 // if we are done, and there are no more groups, we are done
-                return 1;
+                return BigInteger.ONE;
             } else {
                 // if we are done and there are remaining broken groups, no solution
-                return 0;
+                return BigInteger.ZERO;
             }
         } else {
-            return pluginBrokenGroups(springs, nextIndex + 1, brokenGroups, brokenGroupIndex + 1);
+            return dp[nextIndex + 1][brokenGroupIndex + 1];
         }
     }
 }
