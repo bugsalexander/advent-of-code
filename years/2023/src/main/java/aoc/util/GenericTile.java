@@ -16,4 +16,15 @@ public interface GenericTile {
         }
         throw new IllegalArgumentException("no type for char");
     }
+
+    static <E extends GenericTile> String toGridString(E[][] grid) {
+        StringBuilder sb = new StringBuilder();
+        for (E[] row : grid) {
+            for (E e : row) {
+                sb.append(e.getChar());
+            }
+            sb.append('\n');
+        }
+        return sb.toString();
+    }
 }

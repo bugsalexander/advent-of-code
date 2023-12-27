@@ -7,7 +7,13 @@ package aoc.day14;
 import aoc.Day;
 import aoc.util.GenericTile;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class Day14 implements Day {
     @Override
@@ -20,7 +26,7 @@ public class Day14 implements Day {
 
         // shift the rocks upward
         shiftRocksVertically(grid, 1);
-        return totalRockLoad(grid).toString();
+        return String.valueOf(totalRockLoad(grid));
     }
 
     @Override
@@ -33,16 +39,40 @@ public class Day14 implements Day {
 
         int totalCycles = 1_000_000_000;
         int onePercent = totalCycles / 100;
-        for (int i = 0; i < totalCycles; i += 1) {
-            shiftRocksVertically(grid, -1);
-            shiftRocksHorizontally(grid, -1);
-            shiftRocksVertically(grid, +1);
-            shiftRocksHorizontally(grid, +1);
-            if (i % onePercent == 0) {
-                System.out.printf("%d%%\n", i / onePercent);
+        // memorize which formats we've already seen, and their totals
+        // hashcode -> pair: (hashcode, total)
+        HashMap<Integer, Pair<Integer, Integer>> mappings = new HashMap<>();
+        int i = 0;
+        for (; i < totalCycles; i += 1) {
+            int initialState = ArrayUtils.hashCode(grid);
+            if (mappings.containsKey(initialState)) {
+                // found a cycle, we are done
+                break;
+            } else {
+                // if not, compute the mapping and save
+                shiftRocksVertically(grid, +1);
+                shiftRocksHorizontally(grid, +1);
+                shiftRocksVertically(grid, -1);
+                shiftRocksHorizontally(grid, -1);
+                int newState = ArrayUtils.hashCode(grid);
+                int total = totalRockLoad(grid);
+                mappings.put(initialState, Pair.of(newState, total));
             }
         }
-        return totalRockLoad(grid).toString();
+
+        // find the length of the cycle
+        int length = 0;
+        int initialHash = mappings.get(ArrayUtils.hashCode(grid)).getLeft();
+        for (int hash = mappings.get(initialHash).getLeft(); hash != initialHash; hash = mappings.get(hash).getLeft()) {
+            length += 1;
+        }
+
+        // mod the remaining by the length of the cycle
+        int remainder = (totalCycles - i + 1) % length;
+        for (int count = 0; count < remainder; count += 1) {
+            initialHash = mappings.get(initialHash).getLeft();
+        }
+        return String.valueOf(mappings.get(initialHash).getRight());
     }
 
     private void shiftRocksVertically(Tile[][] grid, int diff) {
@@ -77,7 +107,7 @@ public class Day14 implements Day {
             for (int col = startIndex; col != endIndex; col += diff) {
                 if (grid[row][col] == Tile.RoundRock) {
                     // move upwards to the most previous empty
-                    prevSwapIndex = findNextEmptySpaceVertically(grid, row, diff, prevSwapIndex, col);
+                    prevSwapIndex = findNextEmptySpaceHorizontally(grid, row, diff, prevSwapIndex, col);
                     // swapping should be the same as setting them to round/empty, but won't overwrite it with empty
                     Tile temp = grid[row][prevSwapIndex];
                     grid[row][prevSwapIndex] = grid[row][col];
@@ -89,12 +119,12 @@ public class Day14 implements Day {
         }
     }
 
-    private BigInteger totalRockLoad(Tile[][] grid) {
-        BigInteger total = BigInteger.ZERO;
+    private int totalRockLoad(Tile[][] grid) {
+        int total = 0;
         for (int row = 0; row < grid.length; row += 1) {
             for (int col = 0; col < grid[0].length; col += 1) {
                 if (grid[row][col] == Tile.RoundRock) {
-                    total = total.add(BigInteger.valueOf(grid.length - row));
+                    total += grid.length - row;
                 }
             }
         }
