@@ -1,8 +1,12 @@
-package aoc.util;
+package aoc.day13;
 
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * trying a new "generic" tile strategy to see if this works better
+ * future alex: it does not because you can't extend it with extra properties easily
+ */
 public class Tile {
     private final char c;
     private Tile(char c) {
@@ -47,5 +51,10 @@ public class Tile {
     @Override
     public int hashCode() {
         return Objects.hash(c);
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(c);
     }
 }

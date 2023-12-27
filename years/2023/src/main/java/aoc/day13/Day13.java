@@ -5,11 +5,11 @@
 package aoc.day13;
 
 import aoc.Day;
-import aoc.util.Tile;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -31,7 +31,8 @@ public class Day13 implements Day {
         // puzzle sizes might be different
         List<Tile[][]> puzzles = parse(input);
         BigInteger total = puzzles.stream()
-                .map(this::countReflectionLines)
+                .map(puzzle -> this.countReflectionLines(puzzle, Set.of(), Set.of()))
+                .map(BigInteger::valueOf)
                 .reduce(BigInteger.ZERO, BigInteger::add);
 
         return total.toString();
@@ -39,7 +40,13 @@ public class Day13 implements Day {
 
     @Override
     public String part2(List<String> input) {
-        return null;
+        List<Tile[][]> puzzles = parse(input);
+        BigInteger total = puzzles.stream()
+                .map(this::permuteSmudgeAndCountReflectionLines)
+                .map(BigInteger::valueOf)
+                .reduce(BigInteger.ZERO, BigInteger::add);
+
+        return total.toString();
     }
 
     private List<Tile[][]> parse(List<String> lines) {
@@ -63,7 +70,15 @@ public class Day13 implements Day {
         return lines.stream().map(line -> Tile.parseLine(line, TILES)).toArray(Tile[][]::new);
     }
 
-    private BigInteger countReflectionLines(Tile[][] puzzle) {
+    private int countReflectionLines(Tile[][] puzzle, Set<Integer> verticalToSkip, Set<Integer> horizontalToSkip) {
+        int vertical = findVerticalReflection(puzzle, verticalToSkip);
+        if (vertical != -1) {
+            return vertical + 1;
+        }
+        return (findHorizontalReflection(puzzle, horizontalToSkip) + 1) * 100;
+    }
+
+    private int findVerticalReflection(Tile[][] puzzle, Set<Integer> leftColsToSkip) {
         /*
         for [0, 1, 2, 3, 4], we treat a "reflection" between 2 and 3 as existing at "2"
         therefore, iterate excluding the last index.
@@ -85,8 +100,7 @@ public class Day13 implements Day {
         where start = (length / 2) - 1 as long as the dimensions of puzzle are >= 2
          */
         int cols = puzzle[0].length;
-        int rows = puzzle.length;
-        if (rows < 2 || cols < 2) {
+        if (cols < 2) {
             throw new IllegalStateException("cannot use this formula on puzzles with dims < 2");
         }
 
@@ -98,26 +112,27 @@ public class Day13 implements Day {
                         .collect(Collectors.toList())
                         .hashCode())
                 .toArray();
-        BigInteger colReflectionAxis = findReflectionAxis(columnHashes, cols);
-        if (!colReflectionAxis.equals(BigInteger.ZERO)) {
-            return colReflectionAxis;
-        }
+        return findReflectionAxis(columnHashes, cols, leftColsToSkip);
+    }
 
+    private int findHorizontalReflection(Tile[][] puzzle, Set<Integer> topRowsToSkip) {
+        int rows = puzzle.length;
+        if (rows < 2) {
+            throw new IllegalStateException("cannot use this formula on puzzles with dims < 2");
+        }
         int[] rowHashes = Arrays.stream(puzzle)
                 .mapToInt(tiles -> List.of(tiles).hashCode())
                 .toArray();
-        BigInteger rowReflectionAxis = findReflectionAxis(rowHashes, rows);
-        if (!rowReflectionAxis.equals(BigInteger.ZERO)) {
-            return rowReflectionAxis.multiply(BigInteger.valueOf(100));
-        }
-
-        throw new IllegalStateException("there should have been some existing reflection");
+        return findReflectionAxis(rowHashes, rows, topRowsToSkip);
     }
 
-    private BigInteger findReflectionAxis(int[] colHashes, int cols) {
+    private int findReflectionAxis(int[] colHashes, int cols, Set<Integer> leftColsToSkip) {
         int leftCol = cols / 2 - 1 + (cols % 2);
         for (int rowOffset = 0; rowOffset < cols - 1; rowOffset += 1) {
             leftCol += rowOffset * (int) Math.pow(-1, rowOffset);
+            if (leftColsToSkip.contains(leftCol)) {
+                continue;
+            }
             /*
             [0, 1, 2, 3, 4]
             for leftCol = 1, first compare (1, 2), then (0, 3), stop. so range [0, 2)
@@ -151,9 +166,34 @@ public class Day13 implements Day {
             });
             if (isMirrored) {
                 // return the # of cols to the left of the mirror
-                return BigInteger.valueOf(leftCol + 1);
+                return leftCol;
             }
         }
-        return BigInteger.ZERO;
+        return -1;
+    }
+
+    private int permuteSmudgeAndCountReflectionLines(Tile[][] puzzle) {
+        // the old reflection might still be valid, so skip it if that's the old one
+        Set<Integer> verticalToSkip = Set.of(findVerticalReflection(puzzle, Set.of()));
+        Set<Integer> horizontalToSkip = Set.of();
+        if (verticalToSkip.contains(-1)) {
+            verticalToSkip = Set.of();
+            horizontalToSkip = Set.of(findHorizontalReflection(puzzle, Set.of()));
+        }
+
+        for (int row = 0; row < puzzle.length; row += 1) {
+            for (int col = 0; col < puzzle[0].length; col += 1) {
+                // try flipping this bad boi
+                Tile original = puzzle[row][col];
+                puzzle[row][col] = original == ASH ? ROCKS : ASH;
+                int solution = countReflectionLines(puzzle, verticalToSkip, horizontalToSkip);
+                if (solution != 0) {
+                    return solution;
+                }
+                puzzle[row][col] = original;
+            }
+        }
+
+        throw new IllegalStateException("no possible flip was found");
     }
 }
