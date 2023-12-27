@@ -4,10 +4,9 @@
 
 package aoc.util;
 
-import java.util.Map;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-
+/**
+ * @deprecated instead of using this, use {@link org.apache.commons.lang3.tuple.Pair}
+ */
 public class Pair<F, S> {
     private final F first;
     private final S second;
