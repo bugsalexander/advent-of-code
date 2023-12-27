@@ -40,3 +40,8 @@ manner. the conversion was straightforward, and after switching to biginteger (a
 in between the duplicated spring input) the solution worked.
 
 overall spent way less time than day 10 part 2. only took around an hour.
+
+### day 13
+
+sort of feels like cheating, but to speed it up a bit, i hash the entire row/colum to avoid checking stuff lmao.
+tbh i'm not even sure if this speeds it up since I did this preemptively, so I'm curious how slow it'd be if i didn't hash
