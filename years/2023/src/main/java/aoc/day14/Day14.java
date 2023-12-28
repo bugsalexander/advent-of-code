@@ -4,16 +4,14 @@
 
 package aoc.day14;
 
-import aoc.Day;
-import aoc.util.GenericTile;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
+
+import aoc.Day;
+import aoc.util.GenericTile;
 
 public class Day14 implements Day {
     @Override
