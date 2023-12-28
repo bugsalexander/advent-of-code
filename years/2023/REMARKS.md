@@ -63,3 +63,13 @@ I am noticing the challenges are getting significantly more difficult.
 I decided I'm going to start recording my times, for fun (since this is long after AOC ended).
 
 This one was pretty straightforward, implementing an algorithm handed to us.
+
+### day 16
+
+- part1: 73m
+- part2: ~5m
+
+Pretty straightforward solution with DFS and a 3D array to memoize results. Didn't spend much time on design,
+just sort of had an idea that ended up working out. Took a while to implement.
+
+Part 2 was very satisfying/simple to implement, since the solution from part1 was already optimized.
