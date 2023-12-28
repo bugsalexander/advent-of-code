@@ -48,3 +48,9 @@ tbh i'm not even sure if this speeds it up since I did this preemptively, so I'm
 
 also, to skip having to refactor everything to biginteger for day2, I've been trying to predict whether or not I'll need it when
 writing the solution for day1. however I feel like I'm basically coinflipping (today I used it, but definitely did not need it).
+
+### day 14
+
+definitely taking advantage of hashcode XD
+
+I am noticing the challenges are getting significantly more difficult.
