@@ -54,3 +54,12 @@ writing the solution for day1. however I feel like I'm basically coinflipping (t
 definitely taking advantage of hashcode XD
 
 I am noticing the challenges are getting significantly more difficult.
+
+### day 15
+
+- part1: 13:44
+- part2: 38:25
+
+I decided I'm going to start recording my times, for fun (since this is long after AOC ended).
+
+This one was pretty straightforward, implementing an algorithm handed to us.
