@@ -38,14 +38,14 @@ public class Day14 implements Day {
                 .toArray(Tile[][]::new);
 
         int totalCycles = 1_000_000_000;
-        int onePercent = totalCycles / 100;
         // memorize which formats we've already seen, and their totals
         // hashcode -> pair: (hashcode, total)
         HashMap<Integer, Pair<Integer, Integer>> mappings = new HashMap<>();
         int i = 0;
+        int hash = -1;
         for (; i < totalCycles; i += 1) {
-            int initialState = ArrayUtils.hashCode(grid);
-            if (mappings.containsKey(initialState)) {
+            hash = ArrayUtils.hashCode(grid);
+            if (mappings.containsKey(hash)) {
                 // found a cycle, we are done
                 break;
             } else {
@@ -54,25 +54,30 @@ public class Day14 implements Day {
                 shiftRocksHorizontally(grid, +1);
                 shiftRocksVertically(grid, -1);
                 shiftRocksHorizontally(grid, -1);
-                int newState = ArrayUtils.hashCode(grid);
+                int nextHash = ArrayUtils.hashCode(grid);
                 int total = totalRockLoad(grid);
-                mappings.put(initialState, Pair.of(newState, total));
+                mappings.put(hash, Pair.of(nextHash, total));
             }
         }
 
         // find the length of the cycle
+        // if the cycle is 4 -> 5 -> 6 -> 7 -> 4, then the length is 4
         int length = 0;
-        int initialHash = mappings.get(ArrayUtils.hashCode(grid)).getLeft();
-        for (int hash = mappings.get(initialHash).getLeft(); hash != initialHash; hash = mappings.get(hash).getLeft()) {
+        int currentHash = hash;
+        do {
             length += 1;
-        }
+            currentHash = mappings.get(currentHash).getLeft();
+        } while (currentHash != hash);
 
         // mod the remaining by the length of the cycle
-        int remainder = (totalCycles - i + 1) % length;
+        // if there are total 10 cycles, and we are on cycle index 4, there should be 5 cycles remaining.
+        // 10 - 4 - 1 = 5
+        int remainder = (totalCycles - i - 1) % length;
+        int finalHash = hash;
         for (int count = 0; count < remainder; count += 1) {
-            initialHash = mappings.get(initialHash).getLeft();
+            finalHash = mappings.get(finalHash).getLeft();
         }
-        return String.valueOf(mappings.get(initialHash).getRight());
+        return String.valueOf(mappings.get(finalHash).getRight());
     }
 
     private void shiftRocksVertically(Tile[][] grid, int diff) {
