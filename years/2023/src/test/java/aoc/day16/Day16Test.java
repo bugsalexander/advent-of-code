@@ -21,4 +21,9 @@ public class Day16Test extends DayTest {
     public void test1() {
         testPart1("46");
     }
+
+    @Test
+    public void testPart2() {
+        testPart2("51");
+    }
 }

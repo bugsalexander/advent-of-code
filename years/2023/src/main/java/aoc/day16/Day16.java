@@ -57,6 +57,31 @@ public class Day16 implements Day {
                         .mapToObj(c -> GenericTile.fromChar(c, Tile.class))
                         .toArray(Tile[]::new))
                 .toArray(Tile[][]::new);
+        int total = totalEnergizedTilesWithStartVector(grid, Pair.of(0, 0), Direction.Right);
+        return String.valueOf(total);
+    }
+
+    @Override
+    public String part2(List<String> input) {
+        Tile[][] grid = input.stream()
+                .map(line -> line.chars()
+                        .mapToObj(c -> GenericTile.fromChar(c, Tile.class))
+                        .toArray(Tile[]::new))
+                .toArray(Tile[][]::new);
+        // find the energized amount for all possible edges
+        int max = 0;
+        for (int row = 0; row < grid.length; row += 1) {
+            max = Math.max(max, totalEnergizedTilesWithStartVector(grid, Pair.of(row, 0), Direction.Right));
+            max = Math.max(max, totalEnergizedTilesWithStartVector(grid, Pair.of(row, grid[0].length - 1), Direction.Left));
+        }
+        for (int col = 0; col < grid[0].length; col += 1) {
+            max = Math.max(max, totalEnergizedTilesWithStartVector(grid, Pair.of(0, col), Direction.Down));
+            max = Math.max(max, totalEnergizedTilesWithStartVector(grid, Pair.of(grid.length - 1, col), Direction.Up));
+        }
+        return String.valueOf(max);
+    }
+
+    private int totalEnergizedTilesWithStartVector(Tile[][] grid, Pair<Integer, Integer> startPos, Direction startDir) {
         // keep track of seen directions for grid
         // 3d array??? crazy??? i was crazy once
         boolean[][][] seenDirections = new boolean[grid.length][grid[0].length][Direction.values().length];
@@ -65,7 +90,7 @@ public class Day16 implements Day {
         // ((row, col), dir)
         Stack<Pair<Pair<Integer, Integer>, Direction>> stack = new Stack<>();
         // beam enters top left, from the left
-        stack.add(Pair.of(Pair.of(0, 0), Direction.Right));
+        stack.add(Pair.of(startPos, startDir));
 
         while (!stack.isEmpty()) {
             Pair<Pair<Integer, Integer>, Direction> pair = stack.pop();
@@ -95,12 +120,7 @@ public class Day16 implements Day {
                 }
             }
         }
-        return String.valueOf(total);
-    }
-
-    @Override
-    public String part2(List<String> input) {
-        return null;
+        return total;
     }
 
     private boolean hasSeen(boolean[][][] seenDirections, Pair<Integer, Integer> pos, Direction dir) {
