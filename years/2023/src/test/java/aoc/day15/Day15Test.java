@@ -20,4 +20,9 @@ public class Day15Test extends DayTest {
     public void test1() {
         testPart1("1320");
     }
+
+    @Test
+    public void test2() {
+        testPart2("145");
+    }
 }
