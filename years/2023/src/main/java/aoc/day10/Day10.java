@@ -18,7 +18,7 @@ import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import aoc.Day;
-import aoc.util.Coord;
+import aoc.util.Posn;
 import aoc.util.Pair;
 
 public class Day10 implements Day {
@@ -82,7 +82,7 @@ public class Day10 implements Day {
         }
 
         // now we conduct floodfill. add neighbors
-        HashSet<Coord> seen = new HashSet<>();
+        HashSet<Posn> seen = new HashSet<>();
         Stack<Tile> stack = new Stack<>();
         seen.add(start.getCoord());
         stack.push(start);
@@ -113,7 +113,7 @@ public class Day10 implements Day {
 
         for (int row = 0; row < tiles.length; row += 1) {
             for (int col = 0; col < tiles[0].length; col += 1) {
-                if (seen.contains(new Coord(row, col))) {
+                if (seen.contains(Posn.of(row, col))) {
                     if (tileToInwardVectors.containsKey(tiles[row][col])) {
 //                        System.out.printf("%s ", tiles[row][col].getType().getChar());
                         System.out.printf("%s ", stringifyVector(tileToInwardVectors.get(tiles[row][col])));
@@ -135,7 +135,7 @@ public class Day10 implements Day {
         for (int row = 0; row < tiles.length; row += 1) {
             TileType[] tileTypes = input.get(row).chars().mapToObj(c -> TileType.fromChar((char) c)).toArray(TileType[]::new);
             for (int col = 0; col < tiles[0].length; col += 1) {
-                Tile t = new Tile(tileTypes[col], new Coord(row, col));
+                Tile t = new Tile(tileTypes[col], Posn.of(row, col));
                 if (t.getType() == TileType.Start) {
                     start = t;
                 }

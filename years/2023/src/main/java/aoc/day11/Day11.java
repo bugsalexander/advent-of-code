@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import aoc.Day;
-import aoc.util.Coord;
+import aoc.util.Posn;
 import aoc.util.Pair;
 
 public class Day11 implements Day {
@@ -36,12 +36,12 @@ public class Day11 implements Day {
         boolean[] isColEmpty = new boolean[input.get(0).length()];
         Arrays.fill(isRowEmpty, true);
         Arrays.fill(isColEmpty, true);
-        List<Coord> galaxies = new ArrayList<>();
+        List<Posn> galaxies = new ArrayList<>();
         for (int row = 0; row < input.size(); row += 1) {
             for (int col = 0; col < input.get(0).length(); col += 1) {
                 TileType t = TileType.fromChar(input.get(row).charAt(col));
                 if (t == TileType.Galaxy) {
-                    galaxies.add(new Coord(row, col));
+                    galaxies.add(Posn.of(row, col));
                 }
                 isRowEmpty[row] = isRowEmpty[row] && t == TileType.EmptySpace;
                 isColEmpty[col] = isColEmpty[col] && t == TileType.EmptySpace;
@@ -50,7 +50,7 @@ public class Day11 implements Day {
         return expandGalaxiesAndCountShortestPathDistances(expandedSpacePerEmpty.subtract(BigInteger.ONE), galaxies, isRowEmpty, isColEmpty);
     }
 
-    private BigInteger expandGalaxiesAndCountShortestPathDistances(BigInteger expandedSpacePerEmpty, List<Coord> galaxies, boolean[] isRowEmpty, boolean[] isColEmpty) {
+    private BigInteger expandGalaxiesAndCountShortestPathDistances(BigInteger expandedSpacePerEmpty, List<Posn> galaxies, boolean[] isRowEmpty, boolean[] isColEmpty) {
         int[] emptyRows = keepTrueIndices(isRowEmpty);
         int[] emptyCols = keepTrueIndices(isColEmpty);
         List<Pair<BigInteger, BigInteger>> expandedGalaxies = galaxies.stream().map(galaxy -> {

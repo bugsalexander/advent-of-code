@@ -4,7 +4,7 @@
 
 package aoc.day10;
 
-import aoc.util.Coord;
+import aoc.util.Posn;
 import aoc.util.Pair;
 import java.util.List;
 import java.util.Optional;
@@ -13,11 +13,11 @@ import java.util.stream.Collectors;
 public class Tile {
     private final TileType tileType;
     private Pipe pipe;
-    private final Coord coord;
+    private final Posn coord;
     private List<Pair<Direction, Tile>> connections;
 
 
-    public Tile(TileType tileType, Coord coord) {
+    public Tile(TileType tileType, Posn coord) {
         this.tileType = tileType;
         this.coord = coord;
         this.pipe = this.tileType.getPipe().orElse(null);
@@ -64,7 +64,7 @@ public class Tile {
         return getCoord().hashCode();
     }
 
-    public Coord getCoord() {
+    public Posn getCoord() {
         return coord;
     }
 

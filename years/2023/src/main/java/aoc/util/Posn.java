@@ -6,13 +6,19 @@ package aoc.util;
 
 import java.util.Objects;
 
-public class Coord {
+import org.apache.commons.lang3.tuple.Pair;
+
+public class Posn {
     private final int row;
     private final int col;
 
-    public Coord(int row, int col) {
+    private Posn(int row, int col) {
         this.row = row;
         this.col = col;
+    }
+
+    public static Posn of(int row, int col) {
+        return new Posn(row, col);
     }
 
     public int getRow() {
@@ -31,8 +37,8 @@ public class Coord {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Coord coord = (Coord) o;
-        return getRow() == coord.getRow() && getCol() == coord.getCol();
+        Posn posn = (Posn) o;
+        return getRow() == posn.getRow() && getCol() == posn.getCol();
     }
 
     @Override
@@ -43,5 +49,21 @@ public class Coord {
     @Override
     public String toString() {
         return String.format("(%d, %d)", row, col);
+    }
+
+    public boolean withinBounds(int rows, int cols) {
+        return 0 <= row && row < rows && 0 <= col && col < cols;
+    }
+
+    public <T> T at(T[][] grid) {
+        return grid[row][col];
+    }
+
+    public static Posn fromPair(Pair<Integer, Integer> integerIntegerPair) {
+        return Posn.of(integerIntegerPair.getLeft(), integerIntegerPair.getRight());
+    }
+
+    public static Posn add(Posn a, Posn b) {
+        return Posn.of(a.getRow() + b.getRow(), a.getCol() + b.getCol());
     }
 }

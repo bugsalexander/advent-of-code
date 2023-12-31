@@ -2,11 +2,11 @@
  * Copyright 2023 VMware, Inc.  All rights reserved. VMware Confidential
  * *********************************************************************/
 
-package aoc.day16;
+package aoc.util;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-public enum Direction {
+public enum GridDirection {
     Left(Pair.of(0, -1)),
     Right(Pair.of(0, +1)),
     Up(Pair.of(-1, 0)),
@@ -16,7 +16,7 @@ public enum Direction {
     // row, col
     private final Pair<Integer, Integer> vector;
 
-    Direction(Pair<Integer, Integer> vector) {
+    GridDirection(Pair<Integer, Integer> vector) {
         this.vector = vector;
     }
 
