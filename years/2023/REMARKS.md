@@ -73,3 +73,13 @@ Pretty straightforward solution with DFS and a 3D array to memoize results. Didn
 just sort of had an idea that ended up working out. Took a while to implement.
 
 Part 2 was very satisfying/simple to implement, since the solution from part1 was already optimized.
+
+### day 17
+
+- part1: 3 days???
+
+First, tried finding any way to algorithmically solve this. Day 2, after writing down that we need to keep track of
+"potential solutions" and "shortest distances", realized that this is an application of Dijkstra's algorithm.
+
+Figured out pretty fast how to transform the input graph and 3-in-a-row same direction limitation into a single directed
+graph. Spent the rest of the day here and there implementing Dijkstra's.
