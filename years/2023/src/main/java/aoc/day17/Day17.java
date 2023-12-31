@@ -138,11 +138,16 @@ public class Day17 implements Day {
 
             // for the current node, consider all of its unvisited neighbors
             for (Pair<Integer, Node> pair : current.getNeighbors()) {
+                if (!tentativeDistance.containsKey(current)) {
+                    // then we have a problem!
+                    throw new IllegalStateException("didn't have a tentative distance for a node");
+                }
                 int tentativeDistanceThroughCurrentNode = tentativeDistance.get(current) + pair.getLeft();
                 int currentTentativeDistance = tentativeDistance.getOrDefault(pair.getRight(), Integer.MAX_VALUE);
                 if (tentativeDistanceThroughCurrentNode < currentTentativeDistance) {
                     tentativeDistance.put(pair.getRight(), tentativeDistanceThroughCurrentNode);
-                    // can add or remove, or also just re-add (and make sure to skip incorrect pops)
+                    // force queue recalculation by remove and add
+                    priorityQueue.remove(pair.getRight());
                     priorityQueue.add(pair.getRight());
                 }
             }
