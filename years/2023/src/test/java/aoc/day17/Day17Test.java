@@ -20,4 +20,15 @@ public class Day17Test extends DayTest {
     public void testPart1() {
         testPart1("102");
     }
+
+    @Test
+    public void testPart2() {
+        testPart2("94");
+    }
+
+    @Test
+    public void testPart2Test2() {
+        String input = "111111111111\n" + "999999999991\n" + "999999999991\n" + "999999999991\n" + "999999999991";
+        testPart2(input, "71");
+    }
 }
