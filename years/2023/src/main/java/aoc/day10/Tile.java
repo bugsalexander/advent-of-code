@@ -4,11 +4,12 @@
 
 package aoc.day10;
 
-import aoc.util.Posn;
-import aoc.util.Pair;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import aoc.util.Posn;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 public class Tile {
     private final TileType tileType;
@@ -51,7 +52,7 @@ public class Tile {
             return neighbors.stream().filter(this::isTileConnectedToUs).collect(Collectors.toList());
         }
         // we are connected to them if our connections include them
-        return neighbors.stream().filter(pair -> getPipeDirections().contains(pair.getFirst())).collect(Collectors.toList());
+        return neighbors.stream().filter(pair -> getPipeDirections().contains(pair.getLeft())).collect(Collectors.toList());
     }
 
     @Override
@@ -69,11 +70,11 @@ public class Tile {
     }
 
     private boolean isTileConnectedToUs(Pair<Direction, Tile> pair) {
-        if (pair.getSecond().getPipe().isEmpty()) {
+        if (pair.getRight().getPipe().isEmpty()) {
             return false;
         }
         // the tile is "connected" to us if the tile is connected to the opposite the direction the tile is in (which is us)
-        return pair.getSecond().getPipeDirections().contains(pair.getFirst().getOpposite());
+        return pair.getRight().getPipeDirections().contains(pair.getLeft().getOpposite());
     }
 
     public List<Pair<Direction, Tile>> getConnections() {

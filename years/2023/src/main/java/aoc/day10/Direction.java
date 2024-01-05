@@ -4,8 +4,9 @@
 
 package aoc.day10;
 
-import aoc.util.Pair;
 import java.util.Arrays;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * never eat soggy waffles!

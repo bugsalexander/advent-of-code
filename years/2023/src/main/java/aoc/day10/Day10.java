@@ -19,7 +19,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import aoc.Day;
 import aoc.util.Posn;
-import aoc.util.Pair;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 public class Day10 implements Day {
     @Override
@@ -61,14 +62,14 @@ public class Day10 implements Day {
         while (currTile != null) {
             // the orthodox interior-facing vector of the next tile is the one that has the higher dot product with the current interior direction
             Pair<Integer, Integer> interiorPointingVector = tileToInwardVectors.get(prevTile);
-            Direction offset = currTile.getFirst();
-            Pair<Integer, Integer> similarVector = getPipeOrthodoxVectors(currTile.getSecond().getPipe().orElseThrow()).stream()
+            Direction offset = currTile.getLeft();
+            Pair<Integer, Integer> similarVector = getPipeOrthodoxVectors(currTile.getRight().getPipe().orElseThrow()).stream()
                     // adjust the vectors by the position diff to make the dot product more accurate
                     .map(vector -> Pair.of(vector, dotProduct(unitVectorAdd(vector, offset), interiorPointingVector)))
-                    .max(Comparator.comparingDouble(Pair::getSecond))
-                    .map(Pair::getFirst)
+                    .max(Comparator.comparingDouble(Pair::getRight))
+                    .map(Pair::getLeft)
                     .orElseThrow();
-            tileToInwardVectors.put(currTile.getSecond(), similarVector);
+            tileToInwardVectors.put(currTile.getRight(), similarVector);
             /*
             inward vector = (-1, 1)
             diff adjust = (1, 0)
@@ -76,9 +77,9 @@ public class Day10 implements Day {
             adjusted vectors = (0, -1), (2, 1)
              */
 
-            prevTile = currTile.getSecond();
-            currTile = currTile.getSecond().getConnections().stream()
-                    .filter(p -> !tileToInwardVectors.containsKey(p.getSecond())).findFirst().orElse(null);
+            prevTile = currTile.getRight();
+            currTile = currTile.getRight().getConnections().stream()
+                    .filter(p -> !tileToInwardVectors.containsKey(p.getRight())).findFirst().orElse(null);
         }
 
         // now we conduct floodfill. add neighbors
@@ -94,19 +95,19 @@ public class Day10 implements Day {
                 Pair<Integer, Integer> inwardVector = tileToInwardVectors.get(tile);
                 // they are in the direction of the inward vector if the dot product is >= 0 ("sameness" is positive)
                 List<Pair<Direction, Tile>> similarNeighbors = neighbors.stream()
-                        .filter(p -> !seen.contains(p.getSecond().getCoord())
+                        .filter(p -> !seen.contains(p.getRight().getCoord())
                                 // either is an inward tile, or is part of the loop
-                                && (dotProduct(p.getFirst().asVector(), inwardVector) >= 0 || tileToInwardVectors.containsKey(p.getSecond())))
+                                && (dotProduct(p.getLeft().asVector(), inwardVector) >= 0 || tileToInwardVectors.containsKey(p.getRight())))
                         .collect(Collectors.toList());
                 similarNeighbors.forEach(p -> {
-                    seen.add(p.getSecond().getCoord());
-                    stack.push(p.getSecond());
+                    seen.add(p.getRight().getCoord());
+                    stack.push(p.getRight());
                 });
             } else {
                 // if is a contained tile, just add everything not yet seen
-                neighbors.stream().filter(p -> !seen.contains(p.getSecond().getCoord())).forEach(p -> {
-                    seen.add(p.getSecond().getCoord());
-                    stack.push(p.getSecond());
+                neighbors.stream().filter(p -> !seen.contains(p.getRight().getCoord())).forEach(p -> {
+                    seen.add(p.getRight().getCoord());
+                    stack.push(p.getRight());
                 });
             }
         }
@@ -144,7 +145,7 @@ public class Day10 implements Day {
         }
         // set the corresponding pipe connection for start tile
         Set<Direction> ourConnections = getAttemptedConnections(Objects.requireNonNull(start), tiles)
-                .stream().map(Pair::getFirst).collect(Collectors.toSet());
+                .stream().map(Pair::getLeft).collect(Collectors.toSet());
         for (Pipe pipe : Pipe.values()) {
             Set<Direction> pipeConnections = new HashSet<>(pipe.getDirections());
             if (pipeConnections.containsAll(ourConnections) && ourConnections.containsAll(pipeConnections)) {
@@ -165,7 +166,7 @@ public class Day10 implements Day {
             for (Tile tile : queue) {
                 List<Pair<Direction, Tile>> connections = getAttemptedConnections(tile, grid);
                 connections.stream()
-                        .map(Pair::getSecond)
+                        .map(Pair::getRight)
                         .filter(t -> t != null && !seen.contains(t)).forEach(t -> {
                             nextQueue.add(t);
                             seen.add(t);
@@ -215,33 +216,33 @@ public class Day10 implements Day {
     }
 
     private double dotProduct(Pair<Double, Double> v1, Pair<Integer, Integer> v2) {
-        return v1.getFirst() * v2.getFirst() + v1.getSecond() * v2.getSecond();
+        return v1.getLeft() * v2.getLeft() + v1.getRight() * v2.getRight();
     }
 
     private String stringifyVector(Pair<Integer, Integer> v) {
-        if (v.getFirst() == 0 && v.getSecond() == 0) {
+        if (v.getLeft() == 0 && v.getRight() == 0) {
             return "X";
         }
-        if (v.getFirst() == 0) {
-            if (v.getSecond() < 0) {
+        if (v.getLeft() == 0) {
+            if (v.getRight() < 0) {
                 return "<";
             } else {
                 return ">";
             }
-        } else if (v.getSecond() == 0) {
-            if (v.getFirst() < 0) {
+        } else if (v.getRight() == 0) {
+            if (v.getLeft() < 0) {
                 return "A";
             } else {
                 return "V";
             }
-        } else if (v.getFirst() < 0) {
-            if (v.getSecond() < 0) {
+        } else if (v.getLeft() < 0) {
+            if (v.getRight() < 0) {
                 return "F";
             } else {
                 return "7";
             }
-        } else if (v.getFirst() > 0) {
-            if (v.getSecond() < 0) {
+        } else if (v.getLeft() > 0) {
+            if (v.getRight() < 0) {
                 return "L";
             } else {
                 return "J";
@@ -251,8 +252,8 @@ public class Day10 implements Day {
     }
 
     private Pair<Double, Double> unitVectorAdd(Pair<Integer, Integer> vector, Direction offset) {
-        int row = vector.getFirst() - offset.getRowDiff();
-        int col = vector.getSecond() - offset.getColDiff();
+        int row = vector.getLeft() - offset.getRowDiff();
+        int col = vector.getRight() - offset.getColDiff();
         double total = Math.sqrt(row * row + col * col);
         return Pair.of(row / total, col / total);
     }
