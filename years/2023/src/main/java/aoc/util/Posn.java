@@ -63,6 +63,10 @@ public class Posn {
         return Posn.of(integerIntegerPair.getLeft(), integerIntegerPair.getRight());
     }
 
+    public Posn add(Posn b) {
+        return Posn.add(this, b);
+    }
+
     public static Posn add(Posn a, Posn b) {
         return Posn.of(a.getRow() + b.getRow(), a.getCol() + b.getCol());
     }

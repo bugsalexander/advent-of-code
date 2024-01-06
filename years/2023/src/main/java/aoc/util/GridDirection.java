@@ -23,4 +23,8 @@ public enum GridDirection {
     public Pair<Integer, Integer> getVector() {
         return vector;
     }
+
+    public Posn getPosnDiff() {
+        return Posn.fromPair(vector);
+    }
 }

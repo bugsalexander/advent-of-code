@@ -4,8 +4,11 @@
 
 package aoc.day10;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import aoc.util.Posn;
 
@@ -15,7 +18,7 @@ public class Tile {
     private final TileType tileType;
     private Pipe pipe;
     private final Posn coord;
-    private List<Pair<Direction, Tile>> connections;
+    private List<Pair<Direction, Tile>> connections = new ArrayList<>();
 
 
     public Tile(TileType tileType, Posn coord) {
@@ -92,5 +95,17 @@ public class Tile {
     @Override
     public String toString() {
         return String.format("[%s] %s", pipe != null ? pipe.toString() : "", coord.toString());
+    }
+
+    public void setTypeBasedOnConnections(List<Pair<Direction, Tile>> neighbors) {
+        Set<Direction> ourConnections = neighbors.stream().map(Pair::getLeft).collect(Collectors.toSet());
+        for (Pipe pipe : Pipe.values()) {
+            Set<Direction> pipeConnections = new HashSet<>(pipe.getDirections());
+            if (pipeConnections.containsAll(ourConnections) && ourConnections.containsAll(pipeConnections)) {
+                setPipe(pipe);
+                return;
+            }
+        }
+        throw new IllegalStateException("unable to find a pipe based on given directions");
     }
 }

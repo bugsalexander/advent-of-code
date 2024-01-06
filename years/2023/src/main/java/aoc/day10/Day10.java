@@ -47,9 +47,19 @@ public class Day10 implements Day {
 
         // for each tile in loop, compute a direction representing which way is inwards
         // start at the top left, where the inward direction is to the right and down
-        Tile prevTile = columnToRowTilesInLoop.entrySet().stream()
+        Tile topLeftmostTile = columnToRowTilesInLoop.entrySet().stream()
                 .min(Comparator.comparingInt(Map.Entry::getKey)).orElseThrow()
                 .getValue().get(0);
+
+        Pair<Integer, Integer> loopTileCountAndContainedTileCount = countLoopTilesAndContainedTiles(topLeftmostTile, tiles);
+        return String.valueOf(loopTileCountAndContainedTileCount.getRight());
+    }
+
+    public Pair<Integer, Integer> countLoopTilesAndContainedTiles(Tile topLeftmostTile, Tile[][] tiles) {
+
+        // for each tile in loop, compute a direction representing which way is inwards
+        // start at the top left, where the inward direction is to the right and down
+        Tile prevTile = topLeftmostTile;
         Pair<Direction, Tile> currTile = prevTile.getConnections().get(0);
         // represent a radial direction as a pair of integers (row, col) representing a vector
         HashMap<Tile, Pair<Integer, Integer>> tileToInwardVectors = new HashMap<>();
@@ -85,8 +95,8 @@ public class Day10 implements Day {
         // now we conduct floodfill. add neighbors
         HashSet<Posn> seen = new HashSet<>();
         Stack<Tile> stack = new Stack<>();
-        seen.add(start.getCoord());
-        stack.push(start);
+        seen.add(topLeftmostTile.getCoord());
+        stack.push(topLeftmostTile);
         while (!stack.isEmpty()) {
             Tile tile = stack.pop();
             List<Pair<Direction, Tile>> neighbors = getNeighbors(tile, tiles);
@@ -116,7 +126,7 @@ public class Day10 implements Day {
             for (int col = 0; col < tiles[0].length; col += 1) {
                 if (seen.contains(Posn.of(row, col))) {
                     if (tileToInwardVectors.containsKey(tiles[row][col])) {
-//                        System.out.printf("%s ", tiles[row][col].getType().getChar());
+                        //                        System.out.printf("%s ", tiles[row][col].getType().getChar());
                         System.out.printf("%s ", stringifyVector(tileToInwardVectors.get(tiles[row][col])));
                     } else {
                         System.out.print(". ");
@@ -128,7 +138,9 @@ public class Day10 implements Day {
             System.out.println();
         }
 
-        return String.valueOf(seen.size() - tileToInwardVectors.size());
+        int numLoopTiles = tileToInwardVectors.size();
+        int innerTiles = seen.size() - numLoopTiles;
+        return Pair.of(numLoopTiles, innerTiles);
     }
 
     private Tile buildGraph(Tile[][] tiles, List<String> input) {
@@ -144,15 +156,9 @@ public class Day10 implements Day {
             }
         }
         // set the corresponding pipe connection for start tile
-        Set<Direction> ourConnections = getAttemptedConnections(Objects.requireNonNull(start), tiles)
-                .stream().map(Pair::getLeft).collect(Collectors.toSet());
-        for (Pipe pipe : Pipe.values()) {
-            Set<Direction> pipeConnections = new HashSet<>(pipe.getDirections());
-            if (pipeConnections.containsAll(ourConnections) && ourConnections.containsAll(pipeConnections)) {
-                start.setPipe(pipe);
-                break;
-            }
-        }
+        // programming languages! What evaluates first? ie, where should the Objects.requireNonNull() go?
+        // intellij says the object is checked for nullability first
+        Objects.requireNonNull(start).setTypeBasedOnConnections(getAttemptedConnections((start), tiles));
 
         return start;
     }
